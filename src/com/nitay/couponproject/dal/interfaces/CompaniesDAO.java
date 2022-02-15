@@ -5,10 +5,10 @@ import com.nitay.couponproject.model.Company;
 import java.util.ArrayList;
 
 public interface CompaniesDAO {
-    boolean isCompanyExist(String email, String password);
+    boolean loginCompany(String email, String password);
     long addCompany(Company company);
     void updateCompany(Company company);
     void deleteCompany(int companyID);
     ArrayList<Company> getAllCompanies();
-    Company getOneCompany(int companyID);
+    Company getOneCompany(long companyID);
 }

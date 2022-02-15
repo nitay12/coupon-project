@@ -1,6 +1,7 @@
 package com.nitay.couponproject.dal;
 
 import com.nitay.couponproject.dal.interfaces.CouponsDAO;
+import com.nitay.couponproject.model.Category;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.utils.JDBCUtil;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
@@ -29,7 +30,7 @@ public class CouponsDBDAO implements CouponsDAO {
             String sqlStatement = "INSERT INTO coupons (company_id, category_id, title, description, start_date, end_date, amount, price, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, coupon.getCompanyID());
-            prep.setInt(2, coupon.getCategoryID());
+            prep.setInt(2, getCategoryId(coupon.getCategory()));
             prep.setString(3, coupon.getTitle());
             prep.setString(4, coupon.getDescription());
             prep.setDate(5, coupon.getStartDate());
@@ -56,7 +57,7 @@ public class CouponsDBDAO implements CouponsDAO {
             String sqlStatement = "UPDATE coupons SET (company_id = ?, category_id =?, title = ?, description = ?, start_date = ?, end_date = ?, amount = ?, price = ?, image = ?) WHERE id = ? ";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, coupon.getCompanyID());
-            prep.setInt(2, coupon.getCategoryID());
+            prep.setInt(2, getCategoryId(coupon.getCategory()));
             prep.setString(3, coupon.getTitle());
             prep.setString(4, coupon.getDescription());
             prep.setDate(5, coupon.getStartDate());
@@ -75,25 +76,35 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void deleteCoupon(int couponID) {
         try {
-            String sqlStatement = "DELETE FROM customers WHERE id = ?";
+            String sqlStatement = "DELETE FROM coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setInt(1, couponID);
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to delete coupon with id: "+couponID);
+            throw new RuntimeException("Failed to delete coupon with id: " + couponID);
         }
+    }
 
+    @Override
+    public void deleteCompanyCoupons(int companyID) {
+        try {
+            String sqlStatement = "DELETE FROM coupons WHERE company_id = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            prep.setInt(1, companyID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete company with id: " + companyID + " coupons");
+        }
     }
 
     @Override
     public ArrayList<Coupon> getAllCoupons() {
         try {
-        String sqlStatement = "SELECT * FROM coupons";
-            PreparedStatement prep = connection.prepareStatement(sqlStatement,Statement.RETURN_GENERATED_KEYS);
+            String sqlStatement = "SELECT * FROM coupons";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             ResultSet result = prep.executeQuery();
             ArrayList<Coupon> coupons = new ArrayList<>();
-            while (result.next()){
+            while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
             return coupons;
@@ -108,26 +119,132 @@ public class CouponsDBDAO implements CouponsDAO {
         try {
             String sqlStatement = "SELECT * FROM coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            prep.setInt(1,couponID);
+            prep.setInt(1, couponID);
             ResultSet result = prep.executeQuery();
-            if(!result.next()){
+            if (!result.next()) {
                 return null;
             }
             return ObjectExtractionUtil.resultToCoupon(result);
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to retrieve coupon with id: "+ couponID);
+            throw new RuntimeException("Failed to retrieve coupon with id: " + couponID);
+        }
+    }
+
+    public ArrayList<Coupon> getCompanyCoupons(long companyId) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, companyId);
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of company id: " + companyId);
+        }
+    }
+
+    public ArrayList<Coupon> getCompanyCoupons(long companyId, Category category) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ? AND category = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, companyId);
+            prep.setString(2, String.valueOf(category));
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of company id: " + companyId);
+        }
+    }
+
+    public ArrayList<Coupon> getCompanyCoupons(long companyId, double maxPrice) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ? AND price = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, companyId);
+            prep.setDouble(2, maxPrice);
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of company id: " + companyId);
         }
     }
 
     @Override
-    public void addCouponPurchase(int customerId, int couponId) {
+    public long addCouponPurchase(int customerId, int couponId) {
+        try {
+            String sqlStatement = "INSERT INTO customer_coupon (customer_id, coupon_id) VALUES(?, ?)";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            prep.setLong(1, customerId);
+            prep.setInt(2, couponId);
+            prep.executeUpdate();
+            ResultSet result = prep.getGeneratedKeys();
+
+            if (!result.next()) {
+                throw new RuntimeException("Failed to retrieve coupon purchase id");
+            }
+            return result.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to add new coupon purchase");
+        }
 
     }
 
     @Override
-    public void deleteCouponPurchase(int customerId, int couponId) {
+    public void deleteCouponPurchase(int couponId) {
+        try {
+            String sqlStatement = "DELETE FROM customer_coupon WHERE coupon_id = ? ";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            prep.setInt(1, couponId);
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete coupon " + "(id:" + couponId + ") purchase)");
+        }
+    }
 
+    @Override
+    public void deleteCustomerPurchase(int customerId) {
+        try {
+            String sqlStatement = "DELETE FROM customer_coupon WHERE customer_id = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            prep.setInt(1, customerId);
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete coupon purchase of customer id: " + customerId);
+        }
+    }
+
+    @Override
+    public int getCategoryId(Category category) {
+        try {
+            String sqlStatement = "SELECT id FROM categories WHERE name = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            prep.setString(1, String.valueOf(category));
+            ResultSet result = prep.executeQuery();
+            if (!result.next()) {
+                throw new RuntimeException("Failed to retrieve category id");
+            }
+            return result.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve " + category + " id");
+        }
     }
 }

@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -15,8 +14,7 @@ import java.time.LocalDate;
 public class Coupon {
     private int id;
     private int companyID;
-    private int categoryID;
-    //private Category category;
+    private Category category;
     private String title;
     private String description;
     private Date startDate;
@@ -24,5 +22,4 @@ public class Coupon {
     private int amount;
     private double price;
     private String image;
-
 }

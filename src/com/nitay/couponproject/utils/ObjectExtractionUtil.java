@@ -1,9 +1,9 @@
 package com.nitay.couponproject.utils;
 
+import com.nitay.couponproject.model.Category;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.model.Customer;
-import org.w3c.dom.ls.LSOutput;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,7 +29,7 @@ public class ObjectExtractionUtil {
         return new Coupon(
                 result.getInt("id"),
                 result.getInt("company_id"),
-                result.getInt("category_id"),
+                Category.values()[result.getInt("category_id")],
                 result.getString("title"),
                 result.getString("description"),
                 result.getDate("start_date"),

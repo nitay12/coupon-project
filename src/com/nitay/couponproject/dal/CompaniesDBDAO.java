@@ -22,7 +22,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
 
     private final Connection connection;
 
-    public boolean isCompanyExist(final String email, final String password) {
+    public boolean loginCompany(final String email, final String password) {
         ArrayList<Company> companies = getAllCompanies();
         for (Company c :
                 companies) {
@@ -97,7 +97,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
     }
 
     @Override
-    public Company getOneCompany(int companyID) {
+    public Company getOneCompany(long companyID) {
         try {
             String sqlStatement = "SELECT * FROM companies WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);

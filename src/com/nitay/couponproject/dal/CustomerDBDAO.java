@@ -1,6 +1,5 @@
 package com.nitay.couponproject.dal;
 
-import com.nitay.couponproject.dal.interfaces.CompaniesDAO;
 import com.nitay.couponproject.dal.interfaces.CustomersDAO;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Customer;
