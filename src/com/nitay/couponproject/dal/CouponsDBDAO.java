@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class CouponsDBDAO implements CouponsDAO {
     public static final CouponsDBDAO instance = new CouponsDBDAO();
-
+//TODO: Custom exceptions
     private CouponsDBDAO() {
         try {
             connection = JDBCUtil.getConnection();
@@ -183,6 +183,62 @@ public class CouponsDBDAO implements CouponsDAO {
             throw new RuntimeException("Failed to retrieve all coupons of company id: " + companyId);
         }
     }
+
+
+    public ArrayList<Coupon> getCustomerCoupons(long customerId) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons WHERE customer_id = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, customerId);
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of customer id: " + customerId);
+        }
+    }
+
+    public ArrayList<Coupon> getCustomerCoupons(long customerId, Category category) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons INNER JOIN customer_coupon ON id = ? AND category = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, customerId);
+            prep.setString(2, String.valueOf(category));
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of customer id: " + customerId);
+        }
+    }
+
+    public ArrayList<Coupon> getCustomerCoupons(long customerId, double maxPrice) {
+        try {
+            String sqlStatement = "SELECT * FROM coupons INNER JOIN customer_coupon ON id = ? AND price = ?";
+            PreparedStatement prep = connection.prepareStatement(sqlStatement);
+            prep.setLong(1, customerId);
+            prep.setDouble(2, maxPrice);
+            ResultSet result = prep.executeQuery();
+            ArrayList<Coupon> coupons = new ArrayList<>();
+            while (result.next()) {
+                coupons.add(ObjectExtractionUtil.resultToCoupon(result));
+            }
+            return coupons;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to retrieve all coupons of customer id: " + customerId);
+        }
+    }
+
+
 
     @Override
     public long addCouponPurchase(int customerId, int couponId) {
