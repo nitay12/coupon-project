@@ -29,7 +29,7 @@ public class ObjectExtractionUtil {
         return new Coupon(
                 result.getInt("id"),
                 result.getInt("company_id"),
-                Category.values()[result.getInt("category_id")],
+                Category.valueOf(result.getString("category")),
                 result.getString("title"),
                 result.getString("description"),
                 result.getDate("start_date"),

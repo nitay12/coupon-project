@@ -14,14 +14,14 @@ public interface CouponsDAO {
 
     ArrayList<Coupon> getAllCoupons();
     Coupon getOneCoupon(int couponID);
-    long addCouponPurchase(int customerId, int couponId);
+    long addCouponPurchase(long customerId, int couponId);
 
     //Separated this method into two methods for better implementation
     //void deleteCouponPurchase(int customerId, int couponId);
 
     void deleteCouponPurchase(int couponId);
 
-    void deleteCustomerPurchase(int customerId);
+    void deleteCustomerPurchase(long customerId);
 
     int getCategoryId(Category category);
 }

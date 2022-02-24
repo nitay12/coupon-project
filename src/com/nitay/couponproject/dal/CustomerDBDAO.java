@@ -104,11 +104,11 @@ public class CustomerDBDAO implements CustomersDAO {
     }
 
     @Override
-    public Customer getOneCustomer(int customerID) {
+    public Customer getOneCustomer(long customerID) {
         try{
             String sqlStatement = "SELECT * FROM customers WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement,Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setInt(1,customerID);
+            preparedStatement.setLong(1,customerID);
             ResultSet result = preparedStatement.executeQuery();
             if(!result.next()){
                 return null;

@@ -6,12 +6,16 @@ import com.nitay.couponproject.exceptions.WrongCredentialsException;
 import com.nitay.couponproject.model.Category;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Coupon;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 //TODO: Verify that methods using companyId arent get null or 0 (throw not logged in exception)
+@AllArgsConstructor
+@NoArgsConstructor
 public class CompanyFacade extends ClientFacade {
     @Override
-    protected boolean login(String email, String password) throws WrongCredentialsException {
+    public boolean login(String email, String password) throws WrongCredentialsException {
         ArrayList<Company> allCompanies = companiesDBDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
@@ -24,6 +28,7 @@ public class CompanyFacade extends ClientFacade {
     }
     private long companyId;
     public long addCoupon(Coupon coupon) throws CouponTitleExistException {
+        coupon.setCompanyID((int) companyId);//TODO: make all ids Long
         ArrayList<Coupon> allCoupons = couponsDBDAO.getAllCoupons();
         for (Coupon c :
                 allCoupons) {
@@ -37,22 +42,22 @@ public class CompanyFacade extends ClientFacade {
     //TODO: Verify that company id is equal to companyId state variable
     public void updateCoupon(Coupon coupon) throws UpdateException {
         Coupon couponToUpdate = couponsDBDAO.getOneCoupon(coupon.getId());
-        if(coupon.getCompanyID()==couponToUpdate.getCompanyID()){
+        if(coupon.getCompanyID()!=couponToUpdate.getCompanyID()){
             throw new UpdateException("Company ID cannot be updated");
         }
         couponsDBDAO.updateCoupon(coupon);
     }
     public void deleteCoupon(int couponId){
-        couponsDBDAO.deleteCoupon(couponId);
         couponsDBDAO.deleteCouponPurchase(couponId);
+        couponsDBDAO.deleteCoupon(couponId);
     }
     public ArrayList<Coupon> getCompanyCoupons(){
         return couponsDBDAO.getCompanyCoupons(companyId);
     }
-    public ArrayList<Coupon> getCompanyCouponsByCategory(Category category){
+    public ArrayList<Coupon> getCompanyCoupons(Category category){
         return couponsDBDAO.getCompanyCoupons(companyId, category);
     }
-    public ArrayList<Coupon> getCompanyCouponsMaxPrice(double maxPrice){
+    public ArrayList<Coupon> getCompanyCoupons(double maxPrice){
         return couponsDBDAO.getCompanyCoupons(companyId, maxPrice);
     }
     public Company loggedInCompanyDetails(){

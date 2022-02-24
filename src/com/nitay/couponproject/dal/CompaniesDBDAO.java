@@ -106,7 +106,9 @@ public class CompaniesDBDAO implements CompaniesDAO {
             if (!result.next()) {
                 return null;
             }
-            return ObjectExtractionUtil.resultToCompany(result);
+            Company company = ObjectExtractionUtil.resultToCompany(result);
+
+            return company;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to retrieve company with id: " + companyID);

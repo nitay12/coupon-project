@@ -10,5 +10,5 @@ public interface CustomersDAO {
     void updateCustomer(Customer customer);
     void deleteCustomer(int customerID);
     ArrayList<Customer> getAllCustomers();
-    Customer getOneCustomer(int customerID);
+    Customer getOneCustomer(long customerID);
 }
