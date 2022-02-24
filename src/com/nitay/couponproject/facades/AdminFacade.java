@@ -6,14 +6,16 @@ import com.nitay.couponproject.exceptions.UpdateException;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.model.Customer;
+import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 
+@AllArgsConstructor
 public class AdminFacade extends ClientFacade {
     public static AdminFacade instance = new AdminFacade();
 
     @Override
-    protected boolean login(String email, String password) {
+    public boolean login(String email, String password) {
         //TODO:Real login implementation
 //        Hard coded implementation as mentioned in the instructions:
         String ADMIN_MAIL = "admin@admin.com";
@@ -90,11 +92,18 @@ public class AdminFacade extends ClientFacade {
     }
 
     public ArrayList<Company> getAllCompanies() {
-        return companiesDBDAO.getAllCompanies();
+        ArrayList<Company> allCompanies = companiesDBDAO.getAllCompanies();
+        for (Company company :
+                allCompanies) {
+            company.setCoupons(couponsDBDAO.getCompanyCoupons(company.getId()));
+        }
+        return allCompanies;
     }
 
     public Company getOneCompany(int companyId) {
-        return companiesDBDAO.getOneCompany(companyId);
+        Company company = companiesDBDAO.getOneCompany(companyId);
+        company.setCoupons(couponsDBDAO.getCompanyCoupons(companyId));
+        return company;
     }
 
     public long addNewCustomer(Customer customer) {
@@ -118,11 +127,18 @@ public class AdminFacade extends ClientFacade {
     }
 
     public ArrayList<Customer> getAllCustomers() {
-        return customerDBDAO.getAllCustomers();
+        ArrayList<Customer> allCustomers = customerDBDAO.getAllCustomers();
+        for (Customer customer :
+                allCustomers) {
+            customer.setCoupons(couponsDBDAO.getCustomerCoupons(customer.getId()));
+        }
+        return allCustomers;
     }
 
     public Customer getOneCustomer(int customerId) {
-        return customerDBDAO.getOneCustomer(customerId);
+        Customer customer = customerDBDAO.getOneCustomer(customerId);
+        customer.setCoupons(couponsDBDAO.getCustomerCoupons(customer.getId()));
+        return customer;
     }
 
 
