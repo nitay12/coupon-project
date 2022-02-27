@@ -1,6 +1,7 @@
 package com.nitay.couponproject.facades;
 
 import com.nitay.couponproject.exceptions.CouponTitleExistException;
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.exceptions.UpdateException;
 import com.nitay.couponproject.exceptions.WrongCredentialsException;
 import com.nitay.couponproject.model.Category;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 public class CompanyFacade extends ClientFacade {
     @Override
-    public boolean login(String email, String password) throws WrongCredentialsException {
+    public boolean login(String email, String password) throws WrongCredentialsException, CrudException {
         ArrayList<Company> allCompanies = companiesDBDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
@@ -60,7 +61,7 @@ public class CompanyFacade extends ClientFacade {
     public ArrayList<Coupon> getCompanyCoupons(double maxPrice){
         return couponsDBDAO.getCompanyCoupons(companyId, maxPrice);
     }
-    public Company loggedInCompanyDetails(){
+    public Company loggedInCompanyDetails() throws CrudException {
         return companiesDBDAO.getOneCompany(companyId);
     }
 }

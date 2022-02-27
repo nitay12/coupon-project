@@ -1,6 +1,9 @@
 package com.nitay.couponproject.dal;
 
 import com.nitay.couponproject.dal.interfaces.CompaniesDAO;
+import com.nitay.couponproject.enums.CrudType;
+import com.nitay.couponproject.enums.EntityType;
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.utils.JDBCUtil;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
@@ -22,18 +25,20 @@ public class CompaniesDBDAO implements CompaniesDAO {
 
     private final Connection connection;
 
-    public boolean loginCompany(final String email, final String password) {
+    //TODO: deprecate this method - never used and exist in the companyFacade
+    public boolean loginCompany(final String email, final String password) throws CrudException {
         ArrayList<Company> companies = getAllCompanies();
         for (Company c :
                 companies) {
-            if(c.getEmail().equals(email)&&c.getPassword().equals(String.valueOf(password.hashCode()))){
+            if (c.getEmail().equals(email) && c.getPassword().equals(String.valueOf(password.hashCode()))) {
                 return true;
             }
         }
-            return false;
+        return false;
     }
 
-    public long addCompany(final Company company) {
+    //
+    public long addCompany(final Company company) throws CrudException {
         try {
             String sqlStatement = "INSERT INTO companies (name, email, password) VALUES(?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -49,11 +54,11 @@ public class CompaniesDBDAO implements CompaniesDAO {
             return generatedKeysResult.getLong(1);
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to create a new company");
+            throw new CrudException(EntityType.COMPANY, CrudType.CREATE);
         }
     }
 
-    public void updateCompany(Company company) {
+    public void updateCompany(Company company) throws CrudException {
         try {
             String sqlStatement = "UPDATE companies SET name = ?,email = ?, password = ? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -64,11 +69,11 @@ public class CompaniesDBDAO implements CompaniesDAO {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to update company");
+            throw new CrudException(EntityType.COMPANY, CrudType.UPDATE);
         }
     }
 
-    public void deleteCompany(int companyID) {
+    public void deleteCompany(int companyID) throws CrudException {
         String sqlStatement = "DELETE FROM companies WHERE (id = ?)";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -76,11 +81,11 @@ public class CompaniesDBDAO implements CompaniesDAO {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("deletion of company with id: " + companyID + " failed");
+            throw new CrudException(EntityType.COMPANY, CrudType.DELETE);
         }
     }
 
-    public ArrayList<Company> getAllCompanies() {
+    public ArrayList<Company> getAllCompanies() throws CrudException {
         try {
             String sqlStatement = "SELECT * FROM companies";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -92,12 +97,12 @@ public class CompaniesDBDAO implements CompaniesDAO {
             return companies;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to retrieve all companies");
+            throw new CrudException(EntityType.COMPANY, CrudType.READ_ALL);
         }
     }
 
     @Override
-    public Company getOneCompany(long companyID) {
+    public Company getOneCompany(long companyID) throws CrudException {
         try {
             String sqlStatement = "SELECT * FROM companies WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -111,7 +116,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
             return company;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to retrieve company with id: " + companyID);
+            throw new CrudException(EntityType.COMPANY, CrudType.READ);
         }
     }
 }

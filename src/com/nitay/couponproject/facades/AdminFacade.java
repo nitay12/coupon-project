@@ -1,5 +1,6 @@
 package com.nitay.couponproject.facades;
 
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.exceptions.EmailExistException;
 import com.nitay.couponproject.exceptions.NameExistException;
 import com.nitay.couponproject.exceptions.UpdateException;
@@ -56,7 +57,7 @@ public class AdminFacade extends ClientFacade {
             isCompanyNameExist(company, allCompanies);
             isCompanyEmailExist(company, allCompanies);
             return companiesDBDAO.addCompany(company);
-        } catch (NameExistException | EmailExistException e) {
+        } catch (NameExistException | EmailExistException | CrudException e) {
             e.printStackTrace();
             return 0;
         }
@@ -70,7 +71,7 @@ public class AdminFacade extends ClientFacade {
             } else {
                 companiesDBDAO.updateCompany(company);
             }
-        } catch (UpdateException e) {
+        } catch (UpdateException | CrudException e) {
             e.printStackTrace();
         }
     }
@@ -91,7 +92,7 @@ public class AdminFacade extends ClientFacade {
         }
     }
 
-    public ArrayList<Company> getAllCompanies() {
+    public ArrayList<Company> getAllCompanies() throws CrudException {
         ArrayList<Company> allCompanies = companiesDBDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
@@ -100,7 +101,7 @@ public class AdminFacade extends ClientFacade {
         return allCompanies;
     }
 
-    public Company getOneCompany(int companyId) {
+    public Company getOneCompany(int companyId) throws CrudException {
         Company company = companiesDBDAO.getOneCompany(companyId);
         company.setCoupons(couponsDBDAO.getCompanyCoupons(companyId));
         return company;

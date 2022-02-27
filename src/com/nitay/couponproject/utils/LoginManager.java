@@ -2,6 +2,7 @@ package com.nitay.couponproject.utils;
 
 import com.nitay.couponproject.dal.CompaniesDBDAO;
 import com.nitay.couponproject.enums.ClientType;
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.exceptions.WrongCredentialsException;
 import com.nitay.couponproject.facades.AdminFacade;
 import com.nitay.couponproject.facades.ClientFacade;
@@ -16,7 +17,7 @@ public class LoginManager {
     @Getter
     private static LoginManager instance = new LoginManager();
 
-    public ClientFacade login(String email, String password, ClientType clientType) throws WrongCredentialsException {
+    public ClientFacade login(String email, String password, ClientType clientType) throws WrongCredentialsException, CrudException {
         switch (clientType) {
             case Administrator -> {
                 AdminFacade adminFacade = new AdminFacade();

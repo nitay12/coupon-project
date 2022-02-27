@@ -11,14 +11,12 @@ import java.util.ArrayList;
 
 public class CouponsDBDAO implements CouponsDAO {
     public static final CouponsDBDAO instance = new CouponsDBDAO();
-//TODO: Custom exceptions
     private CouponsDBDAO() {
         try {
             connection = JDBCUtil.getConnection();
-        } catch (
-                SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Connection with database was failed");
+            throw new RuntimeException("Connection with the database failed");
         }
     }
 
