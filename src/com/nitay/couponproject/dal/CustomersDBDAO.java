@@ -1,21 +1,21 @@
 package com.nitay.couponproject.dal;
 
 import com.nitay.couponproject.dal.interfaces.CustomersDAO;
-import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Customer;
-import com.nitay.couponproject.utils.JDBCUtil;
+import com.nitay.couponproject.utils.ConnectionPool;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-public class CustomerDBDAO implements CustomersDAO {
-    public static final CustomerDBDAO instance = new CustomerDBDAO();
+public class CustomersDBDAO implements CustomersDAO {
+    public static final CustomersDBDAO instance = new CustomersDBDAO();
 
-    private CustomerDBDAO() {
+    private CustomersDBDAO() {
         try {
-            connection = JDBCUtil.getConnection();
-        } catch (SQLException e) {
+//            connection = JDBCUtil.getConnection();
+            connection = ConnectionPool.getInstance().getConnection();
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException("Connection with database was failed");
         }

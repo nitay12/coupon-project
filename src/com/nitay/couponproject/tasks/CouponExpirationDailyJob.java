@@ -6,7 +6,6 @@ import com.nitay.couponproject.model.Coupon;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class CouponExpirationDailyJob implements Runnable {
     private boolean quit;

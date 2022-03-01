@@ -1,20 +1,19 @@
 package com.nitay.couponproject.facades;
 
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.exceptions.WrongCredentialsException;
 import com.nitay.couponproject.model.Category;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.model.Customer;
-import lombok.Setter;
 
 import java.util.ArrayList;
 
 public class CustomerFacade extends ClientFacade {
-    @Setter
     private long customerId;
 
     @Override
     public boolean login(String email, String password) throws WrongCredentialsException {
-        ArrayList<Customer> allCustomers = customerDBDAO.getAllCustomers();
+        ArrayList<Customer> allCustomers = customersDAO.getAllCustomers();
         for (Customer customer :
                 allCustomers) {
             if (email.equalsIgnoreCase(customer.getEmail()) && String.valueOf(password.hashCode()).equals(customer.getPassword())) {
@@ -27,27 +26,25 @@ public class CustomerFacade extends ClientFacade {
 
     public long purchaseCoupon(Coupon coupon) {
         coupon.purchase();
-        couponsDBDAO.updateCoupon(coupon);
-        return couponsDBDAO.addCouponPurchase(customerId, coupon.getId());
+        couponsDAO.updateCoupon(coupon);
+        return couponsDAO.addCouponPurchase(customerId, coupon.getId());
     }
 
-    private ArrayList<Coupon> getCustomerCoupons() {
-        return couponsDBDAO.getCustomerCoupons(customerId);
+    public ArrayList<Coupon> getCustomerCoupons() {
+        return couponsDAO.getCustomerCoupons(customerId);
     }
 
-    ;
 
-    private ArrayList<Coupon> getCustomerCoupons(Category category) {
-        return couponsDBDAO.getCustomerCoupons(customerId, category);
+    public ArrayList<Coupon> getCustomerCoupons(Category category) throws CrudException {
+        return couponsDAO.getCustomerCoupons(customerId, category);
     }
 
-    ;
 
-    private ArrayList<Coupon> getCustomerCoupons(double maxPrice) {
-        return couponsDBDAO.getCustomerCoupons(customerId, maxPrice);
+    public ArrayList<Coupon> getCustomerCoupons(double maxPrice) {
+        return couponsDAO.getCustomerCoupons(customerId, maxPrice);
     }
 
-    private Customer getCustomerDetails() {
-        return customerDBDAO.getOneCustomer(customerId);
+    public Customer getCustomerDetails() {
+        return customersDAO.getOneCustomer(customerId);
     }
 }

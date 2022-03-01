@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class CompanyFacade extends ClientFacade {
     @Override
     public boolean login(String email, String password) throws WrongCredentialsException, CrudException {
-        ArrayList<Company> allCompanies = companiesDBDAO.getAllCompanies();
+        ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
             if (email.equalsIgnoreCase(company.getEmail()) && String.valueOf(password.hashCode()).equals(company.getPassword())) {
@@ -30,38 +30,38 @@ public class CompanyFacade extends ClientFacade {
     private long companyId;
     public long addCoupon(Coupon coupon) throws CouponTitleExistException {
         coupon.setCompanyID((int) companyId);//TODO: make all ids Long
-        ArrayList<Coupon> allCoupons = couponsDBDAO.getAllCoupons();
+        ArrayList<Coupon> allCoupons = couponsDAO.getAllCoupons();
         for (Coupon c :
                 allCoupons) {
             if (coupon.getCompanyID() == c.getCompanyID() && c.getTitle().equalsIgnoreCase(coupon.getTitle())) {
                 throw new CouponTitleExistException();
             }
-            return couponsDBDAO.addCoupon(coupon);
+            return couponsDAO.addCoupon(coupon);
         }
         return -1;
     }
     //TODO: Verify that company id is equal to companyId state variable
     public void updateCoupon(Coupon coupon) throws UpdateException {
-        Coupon couponToUpdate = couponsDBDAO.getOneCoupon(coupon.getId());
+        Coupon couponToUpdate = couponsDAO.getOneCoupon(coupon.getId());
         if(coupon.getCompanyID()!=couponToUpdate.getCompanyID()){
             throw new UpdateException("Company ID cannot be updated");
         }
-        couponsDBDAO.updateCoupon(coupon);
+        couponsDAO.updateCoupon(coupon);
     }
     public void deleteCoupon(int couponId){
-        couponsDBDAO.deleteCouponPurchase(couponId);
-        couponsDBDAO.deleteCoupon(couponId);
+        couponsDAO.deleteCouponPurchase(couponId);
+        couponsDAO.deleteCoupon(couponId);
     }
     public ArrayList<Coupon> getCompanyCoupons(){
-        return couponsDBDAO.getCompanyCoupons(companyId);
+        return couponsDAO.getCompanyCoupons(companyId);
     }
     public ArrayList<Coupon> getCompanyCoupons(Category category){
-        return couponsDBDAO.getCompanyCoupons(companyId, category);
+        return couponsDAO.getCompanyCoupons(companyId, category);
     }
     public ArrayList<Coupon> getCompanyCoupons(double maxPrice){
-        return couponsDBDAO.getCompanyCoupons(companyId, maxPrice);
+        return couponsDAO.getCompanyCoupons(companyId, maxPrice);
     }
     public Company loggedInCompanyDetails() throws CrudException {
-        return companiesDBDAO.getOneCompany(companyId);
+        return companiesDAO.getOneCompany(companyId);
     }
 }
