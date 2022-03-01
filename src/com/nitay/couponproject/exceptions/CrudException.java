@@ -3,6 +3,9 @@ package com.nitay.couponproject.exceptions;
 import com.nitay.couponproject.enums.CrudType;
 import com.nitay.couponproject.enums.EntityType;
 
+/**
+ * An exception thrown when a CRUD operation goes wrong.
+ */
 public class CrudException extends Exception {
     private String entityName;
     private String formatEntityName(EntityType entityType, CrudType crudType){

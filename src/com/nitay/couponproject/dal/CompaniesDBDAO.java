@@ -4,15 +4,32 @@ import com.nitay.couponproject.dal.interfaces.CompaniesDAO;
 import com.nitay.couponproject.enums.CrudType;
 import com.nitay.couponproject.enums.EntityType;
 import com.nitay.couponproject.exceptions.CrudException;
+import com.nitay.couponproject.facades.ClientFacade;
 import com.nitay.couponproject.model.Company;
-import com.nitay.couponproject.utils.JDBCUtil;
+import com.nitay.couponproject.utils.ConnectionPool;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
+import lombok.Getter;
 
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * A singleton data access object, Implements CompaniesDAO interface to make CRUD operations on a SQL database.
+ * CompaniesDBDAO is connected to the ConnectionPool and used in the facades.
+ *
+ * @see CompaniesDAO
+ * @see ConnectionPool
+ * @see ClientFacade
+ */
 public class CompaniesDBDAO implements CompaniesDAO {
-    public static final CompaniesDBDAO instance = new CompaniesDBDAO();
+    /**
+     * A connection from the ConnectionPool
+     *
+     * @see ConnectionPool
+     */
+    private final Connection connection;
+    @Getter
+    private static final CompaniesDBDAO instance = new CompaniesDBDAO();
 
     private CompaniesDBDAO() {
         try {
@@ -24,21 +41,30 @@ public class CompaniesDBDAO implements CompaniesDAO {
         }
     }
 
-    private final Connection connection;
-
-    //TODO: deprecate this method - never used and exist in the companyFacade
-    public boolean loginCompany(final String email, final String password) throws CrudException {
-        ArrayList<Company> companies = getAllCompanies();
-        for (Company c :
-                companies) {
-            if (c.getEmail().equals(email) && c.getPassword().equals(String.valueOf(password.hashCode()))) {
-                return true;
-            }
-        }
-        return false;
-    }
+    //---I deleted the loginCompany method because its a logic method it was implemented in CompanyFacade---
+//    public boolean loginCompany(final String email, final String password) throws CrudException {
+//        ArrayList<Company> companies = getAllCompanies();
+//        for (Company c :
+//                companies) {
+//            if (c.getEmail().equals(email) && c.getPassword().equals(String.valueOf(password.hashCode()))) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     //
+
+    /**
+     * Adds a new company to the database
+     *
+     * @param company A Company object (no Id required)
+     * @return Auto generated company ID
+     * @throws CrudException - if something gets wrong.
+     * @see Company
+     * @see CrudException
+     */
+    @Override
     public long addCompany(final Company company) throws CrudException {
         try {
             String sqlStatement = "INSERT INTO companies (name, email, password) VALUES(?, ?, ?)";
@@ -59,6 +85,16 @@ public class CompaniesDBDAO implements CompaniesDAO {
         }
     }
 
+    /**
+     * Updates an existing company in the database
+     *
+     * @param company A full Company object (Id param is required)
+     * @throws CrudException - if something gets wrong.
+     * @see Company
+     * @see CrudException
+     */
+
+    @Override
     public void updateCompany(Company company) throws CrudException {
         try {
             String sqlStatement = "UPDATE companies SET name = ?,email = ?, password = ? WHERE id = ?";
@@ -74,11 +110,19 @@ public class CompaniesDBDAO implements CompaniesDAO {
         }
     }
 
-    public void deleteCompany(int companyID) throws CrudException {
+    /**
+     * Deletes a company from the database
+     *
+     * @param companyID The company id in the database
+     * @throws CrudException if something gets wrong.
+     * @see CrudException
+     */
+    @Override
+    public void deleteCompany(long companyID) throws CrudException {
         String sqlStatement = "DELETE FROM companies WHERE (id = ?)";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setInt(1, companyID);
+            preparedStatement.setLong(1, companyID);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,6 +130,15 @@ public class CompaniesDBDAO implements CompaniesDAO {
         }
     }
 
+    /**
+     * Gets all companies that exist in the database
+     *
+     * @return An ArrayList of all companies
+     * @throws CrudException if something gets wrong.
+     * @see Company
+     * @see CrudException
+     */
+    @Override
     public ArrayList<Company> getAllCompanies() throws CrudException {
         try {
             String sqlStatement = "SELECT * FROM companies";
@@ -101,6 +154,16 @@ public class CompaniesDBDAO implements CompaniesDAO {
             throw new CrudException(EntityType.COMPANY, CrudType.READ_ALL);
         }
     }
+
+    /**
+     * Gets a company from the database by given ID
+     *
+     * @param companyID The company id in the database
+     * @return A Company object
+     * @throws CrudException if something gets wrong.
+     * @see Company
+     * @see CrudException
+     */
 
     @Override
     public Company getOneCompany(long companyID) throws CrudException {
