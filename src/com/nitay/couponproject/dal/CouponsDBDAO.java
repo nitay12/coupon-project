@@ -13,8 +13,9 @@ public class CouponsDBDAO implements CouponsDAO {
     public static final CouponsDBDAO instance = new CouponsDBDAO();
     private CouponsDBDAO() {
         try {
-            connection = JDBCUtil.getConnection();
-        } catch (SQLException e) {
+//            connection = JDBCUtil.getConnection();
+            connection = ConnectionPool.getInstance().getConnection();
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException("Connection with the database failed");
         }
