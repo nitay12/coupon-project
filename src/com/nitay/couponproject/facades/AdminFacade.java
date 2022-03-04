@@ -122,12 +122,13 @@ public class AdminFacade extends ClientFacade {
         customersDAO.updateCustomer(customer);
     }
 
-    public void deleteCustomer(int customerId) {
+    public void deleteCustomer(int customerId) throws CrudException {
+        couponsDAO.deletePurchaseByCustomerId(customerId);
         customersDAO.deleteCustomer(customerId);
         couponsDAO.deleteCustomerPurchase(customerId);
     }
 
-    public ArrayList<Customer> getAllCustomers() {
+    public ArrayList<Customer> getAllCustomers() throws CrudException {
         ArrayList<Customer> allCustomers = customersDAO.getAllCustomers();
         for (Customer customer :
                 allCustomers) {
@@ -136,7 +137,7 @@ public class AdminFacade extends ClientFacade {
         return allCustomers;
     }
 
-    public Customer getOneCustomer(int customerId) {
+    public Customer getOneCustomer(int customerId) throws CrudException {
         Customer customer = customersDAO.getOneCustomer(customerId);
         customer.setCoupons(couponsDAO.getCustomerCoupons(customer.getId()));
         return customer;
