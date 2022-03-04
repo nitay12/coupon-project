@@ -19,6 +19,11 @@ public class CrudException extends Exception {
         }
         return "An error occurred while trying to " + crudType.label + " " + entityName;
     }
+
+    public CrudException(String message) {
+        super(message);
+    }
+
     public CrudException(EntityType entityType, CrudType crudType) {
         System.out.println(formatEntityName(entityType, crudType));
     }
