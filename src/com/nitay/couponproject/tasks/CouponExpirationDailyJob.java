@@ -18,24 +18,24 @@ public class CouponExpirationDailyJob implements Runnable {
 
     @Override
     public void run() {
-        while (!quit) {
-            System.out.println("stated daily job");
-            ArrayList<Coupon> coupons = couponsDAO.getAllCoupons();
-            for (Coupon coupon :
-                    coupons) {
-                Date endDate = coupon.getEndDate();
-                Date now = Date.valueOf(LocalDate.now());
-                if (endDate.after(now)){
-                    couponsDAO.deleteCouponPurchase(coupon.getId());
-                    couponsDAO.deleteCoupon(coupon.getId());
-                    System.out.println("Deleted coupon id:" + coupon.getId());
+        try {
+            while (!quit) {
+                System.out.println("stated daily job");
+                ArrayList<Coupon> coupons = couponsDAO.getAllCoupons();
+                for (Coupon coupon :
+                        coupons) {
+                    Date endDate = coupon.getEndDate();
+                    Date now = Date.valueOf(LocalDate.now());
+                    if (endDate.after(now)) {
+                        couponsDAO.deletePurchaseByCouponId(coupon.getId());
+                        couponsDAO.deleteCoupon(coupon.getId());
+                        System.out.println("Deleted coupon id:" + coupon.getId());
+                    }
                 }
+                Thread.sleep(SLEEP_TIME);
             }
-                try {
-                    Thread.sleep(SLEEP_TIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        } catch (InterruptedException | CrudException e) {
+            e.printStackTrace();
         }
     }
 
