@@ -14,36 +14,45 @@ public class MyScanner {
             System.out.print(message);
             return new Scanner(System.in).next();
         } catch (InputMismatchException e) {
-            System.out.println("Wrong input please try again");
-            return getStringInput(message);
+            return getStringInput("Wrong input please try again: ");
         }
     }
 
     public static Integer getIntInput(String message) {
         try {
-            System.out.println(message);
+            System.out.print(message);
             return new Scanner(System.in).nextInt();
         } catch (InputMismatchException e) {
-            System.out.println("Wrong input please try again");
-            return getIntInput(message);
+            return getIntInput("Wrong input please try again: ");
         }
     }
 
     public static Double getDoubleInput(String message) {
         try {
-            System.out.println(message);
+            System.out.print(message);
             return new Scanner(System.in).nextDouble();
         } catch (InputMismatchException e) {
             return getDoubleInput("Wrong input please try again: ");
         }
     }
-    public static Category getCategory(String message){
-        try{
-            System.out.println(message);
+
+    public static Category getCategory(String message) {
+        try {
+            System.out.print(message);
             return Category.valueOf(new Scanner(System.in).next());
-        }
-        catch (InputMismatchException e){
+        } catch (InputMismatchException e) {
             return getCategory("Wrong input please try again: ");
+        } catch (IllegalArgumentException e) {
+            System.out.print("Category not found, The available categories are: ");
+            printCategories();
+            return getCategory("Please enter a valid category name: ");
+        }
+    }
+
+    private static void printCategories() {
+        for (Category category : Category.values()
+        ) {
+            System.out.println(category);
         }
     }
 }
