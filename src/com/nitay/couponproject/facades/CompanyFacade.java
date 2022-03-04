@@ -28,7 +28,7 @@ public class CompanyFacade extends ClientFacade {
         throw new WrongCredentialsException("Wrong email or password");
     }
     private long companyId;
-    public long addCoupon(Coupon coupon) throws CouponTitleExistException {
+    public long addCoupon(Coupon coupon) throws CouponTitleExistException, CrudException {
         coupon.setCompanyID((int) companyId);//TODO: make all ids Long
         ArrayList<Coupon> allCoupons = couponsDAO.getAllCoupons();
         for (Coupon c :
@@ -41,24 +41,24 @@ public class CompanyFacade extends ClientFacade {
         return -1;
     }
     //TODO: Verify that company id is equal to companyId state variable
-    public void updateCoupon(Coupon coupon) throws UpdateException {
+    public void updateCoupon(Coupon coupon) throws UpdateException, CrudException {
         Coupon couponToUpdate = couponsDAO.getOneCoupon(coupon.getId());
         if(coupon.getCompanyID()!=couponToUpdate.getCompanyID()){
             throw new UpdateException("Company ID cannot be updated");
         }
         couponsDAO.updateCoupon(coupon);
     }
-    public void deleteCoupon(int couponId){
-        couponsDAO.deleteCouponPurchase(couponId);
+    public void deleteCoupon(int couponId) throws CrudException {
+        couponsDAO.deletePurchaseByCouponId(couponId);
         couponsDAO.deleteCoupon(couponId);
     }
-    public ArrayList<Coupon> getCompanyCoupons(){
+    public ArrayList<Coupon> getCompanyCoupons() throws CrudException {
         return couponsDAO.getCompanyCoupons(companyId);
     }
-    public ArrayList<Coupon> getCompanyCoupons(Category category){
+    public ArrayList<Coupon> getCompanyCoupons(Category category) throws CrudException {
         return couponsDAO.getCompanyCoupons(companyId, category);
     }
-    public ArrayList<Coupon> getCompanyCoupons(double maxPrice){
+    public ArrayList<Coupon> getCompanyCoupons(double maxPrice) throws CrudException {
         return couponsDAO.getCompanyCoupons(companyId, maxPrice);
     }
     public Company loggedInCompanyDetails() throws CrudException {
