@@ -84,7 +84,7 @@ public class AdminFacade extends ClientFacade {
             for (Coupon coupon :
                     coupons) {
                 if (coupon.getCompanyID() == companyId) {
-                    couponsDAO.deleteCouponPurchase(coupon.getId());
+                    couponsDAO.deletePurchaseByCouponId(coupon.getId());
                 }
             }
         } catch (Exception e) {
