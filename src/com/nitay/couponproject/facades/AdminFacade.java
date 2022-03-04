@@ -125,7 +125,6 @@ public class AdminFacade extends ClientFacade {
     public void deleteCustomer(int customerId) throws CrudException {
         couponsDAO.deletePurchaseByCustomerId(customerId);
         customersDAO.deleteCustomer(customerId);
-        couponsDAO.deleteCustomerPurchase(customerId);
     }
 
     public ArrayList<Customer> getAllCustomers() throws CrudException {
