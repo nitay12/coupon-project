@@ -1,6 +1,7 @@
 package com.nitay.couponproject.tasks;
 
 import com.nitay.couponproject.dal.interfaces.CouponsDAO;
+import com.nitay.couponproject.exceptions.CrudException;
 import com.nitay.couponproject.model.Coupon;
 
 import java.sql.Date;
@@ -11,7 +12,8 @@ public class CouponExpirationDailyJob implements Runnable {
     private boolean quit;
     private CouponsDAO couponsDAO;
     private final int SLEEP_TIME = 5000;
-//            86400000; //<- A day in millis
+
+    //            86400000; //<- A day in millis
     public CouponExpirationDailyJob(CouponsDAO couponsDAO) {
         this.couponsDAO = couponsDAO;
     }
