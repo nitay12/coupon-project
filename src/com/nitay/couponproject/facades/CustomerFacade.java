@@ -24,13 +24,13 @@ public class CustomerFacade extends ClientFacade {
         throw new WrongCredentialsException("Wrong email or password");
     }
 
-    public long purchaseCoupon(Coupon coupon) {
+    public long purchaseCoupon(Coupon coupon) throws CrudException {
         coupon.purchase();
         couponsDAO.updateCoupon(coupon);
         return couponsDAO.addCouponPurchase(customerId, coupon.getId());
     }
 
-    public ArrayList<Coupon> getCustomerCoupons() {
+    public ArrayList<Coupon> getCustomerCoupons() throws CrudException {
         return couponsDAO.getCustomerCoupons(customerId);
     }
 
@@ -40,7 +40,7 @@ public class CustomerFacade extends ClientFacade {
     }
 
 
-    public ArrayList<Coupon> getCustomerCoupons(double maxPrice) {
+    public ArrayList<Coupon> getCustomerCoupons(double maxPrice) throws CrudException {
         return couponsDAO.getCustomerCoupons(customerId, maxPrice);
     }
 
