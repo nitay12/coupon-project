@@ -27,7 +27,7 @@ public class CrudException extends Exception {
     public CrudException(EntityType entityType, CrudType crudType) {
         System.out.println(formatEntityName(entityType, crudType));
     }
-    public CrudException(EntityType entityType, CrudType crudType ,int id) {
+    public CrudException(EntityType entityType, CrudType crudType ,long id) {
         System.out.println(formatEntityName(entityType, crudType) + " with id: " + id);
     }
 }
