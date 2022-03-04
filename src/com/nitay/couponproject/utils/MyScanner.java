@@ -13,8 +13,8 @@ public class MyScanner {
             System.out.print(message);
             return new Scanner(System.in).next();
         } catch (InputMismatchException e) {
-            e.printStackTrace();
-            return null;
+            System.out.println("Wrong input please try again");
+            return getStringInput(message);
         }
     }
 
@@ -23,8 +23,18 @@ public class MyScanner {
             System.out.println(message);
             return new Scanner(System.in).nextInt();
         } catch (InputMismatchException e) {
-            e.printStackTrace();
-            return null;
+            System.out.println("Wrong input please try again");
+            return getIntInput(message);
+        }
+    }
+
+    public static Double getDoubleInput(String message) {
+        try {
+            System.out.println(message);
+            return new Scanner(System.in).nextDouble();
+        } catch (InputMismatchException e) {
+            System.out.println("Wrong input please try again");
+            return getDoubleInput(message);
         }
     }
 }
