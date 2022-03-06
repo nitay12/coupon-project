@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public interface CouponsDAO {
     /**
-     * Adds a new company to the database
+     * Adds a new coupon to the database
      *
      * @param coupon A Coupon object (no Id required)
      * @return Auto generated coupon ID
@@ -83,7 +83,6 @@ public interface CouponsDAO {
 
     //I separated the delete purchase method into two methods for better implementation
 
-
     /**
      * Deletes a coupon purchase
      *
@@ -102,7 +101,7 @@ public interface CouponsDAO {
     void deletePurchaseByCustomerId(long customerId) throws CrudException;
 
     /**
-     * Gets all the given company's coupons
+     * Gets all coupons of a given company
      *
      * @param companyId The company id in the database
      * @return ArrayList of all company's coupons
@@ -141,18 +140,19 @@ public interface CouponsDAO {
     ArrayList<Coupon> getCustomerCoupons(long customerId) throws CrudException;
 
     /**
-     * Gets all the given customer's coupons filtered by given category
+     * Gets all coupons of given customer filtered by given category
      *
      * @param customerId The customer id in the database
-     * @param category  A Category (enum) refers the category column in the database
+     * @param category   A Category (enum) refers the category column in the database
      * @return ArrayList of all customer's coupons filtered by category
      */
     ArrayList<Coupon> getCustomerCoupons(long customerId, Category category) throws CrudException;
+
     /**
      * Gets all coupons of the given customer up to the given maximum price
      *
      * @param customerId The customer id in the database
-     * @param maxPrice  Maximum price to filter the result
+     * @param maxPrice   Maximum price to filter the result
      * @return ArrayList of all customer's coupons up to maxPrice
      * @throws CrudException if something gets wrong.
      */
