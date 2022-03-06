@@ -1,14 +1,8 @@
 package com.nitay.couponproject.utils;
 
-import com.nitay.couponproject.Config;
+import java.sql.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import static com.nitay.couponproject.Config.MySQLpass;
+import static com.nitay.couponproject.config.Config.MySQLpass;
 
 public class JDBCUtil {
     static {
