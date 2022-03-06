@@ -31,14 +31,17 @@ public class ConnectionPool {
 
     private void openAllConnections() throws SQLException {
         for (int counter = 0; counter < NUMBER_OF_CONNECTIONS; counter++) {
-            final Connection connection = DriverManager.getConnection(Config.MySQLurl, Config.MySQLuser, Config.MySQLpass);
+            final Connection connection = DriverManager.getConnection(
+                    Config.MySQLurl,
+                    Config.MySQLuser,
+                    Config.MySQLpass);
             connections.push(connection);
         }
     }
 
     public void closeAllConnections() throws InterruptedException {
         synchronized (connections) {
-            while (connections.size() < NUMBER_OF_CONNECTIONS){
+            while (connections.size() < NUMBER_OF_CONNECTIONS) {
                 connections.wait();
             }
             connections.removeAllElements();
