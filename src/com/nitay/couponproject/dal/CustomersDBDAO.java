@@ -1,16 +1,40 @@
 package com.nitay.couponproject.dal;
 
 import com.nitay.couponproject.dal.interfaces.CustomersDAO;
+import com.nitay.couponproject.enums.CrudType;
+import com.nitay.couponproject.enums.EntityType;
+import com.nitay.couponproject.exceptions.CrudException;
+import com.nitay.couponproject.facades.ClientFacade;
 import com.nitay.couponproject.model.Customer;
 import com.nitay.couponproject.utils.ConnectionPool;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
+import lombok.Getter;
 
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * A singleton data access object, Implements CustomersDAO to make CRUD operations on a SQL database.
+ * CustomersDBDAO is connected to the ConnectionPool and used in the facades.
+ *
+ * @see CustomersDAO
+ * @see ConnectionPool
+ * @see ClientFacade
+ */
 public class CustomersDBDAO implements CustomersDAO {
-    public static final CustomersDBDAO instance = new CustomersDBDAO();
+    @Getter
+    private static final CustomersDBDAO instance = new CustomersDBDAO();
 
+    /**
+     * A connection from the ConnectionPool
+     *
+     * @see ConnectionPool
+     */
+    private final Connection connection;
+
+    /**
+     * Sets the connection variable to a connection from ConnectionPool
+     */
     private CustomersDBDAO() {
         try {
 //            connection = JDBCUtil.getConnection();
@@ -21,9 +45,14 @@ public class CustomersDBDAO implements CustomersDAO {
         }
     }
 
-    private final Connection connection;
-
-    public boolean isCustomerExist(String email, String password) {
+    /**
+     * @param email    Customer email
+     * @param password Customer password
+     * @return Boolean (true if customer is exists in the database)
+     * @deprecated
+     */
+    @Override
+    public boolean isCustomerExist(String email, String password) throws CrudException {
         ArrayList<Customer> customers = getAllCustomers();
         for (Customer customer : customers) {
             if (customer.getEmail().equals(email) && customer.getPassword().equals(String.valueOf(password.hashCode()))) {
@@ -33,8 +62,17 @@ public class CustomersDBDAO implements CustomersDAO {
         return false;
     }
 
+    /**
+     * Adds a new customer to the database
+     *
+     * @param customer A Customer object (no Id required)
+     * @return Auto generated customer ID
+     * @throws CrudException if something gets wrong.
+     * @see Customer
+     * @see CrudException
+     */
     @Override
-    public long addCustomer(Customer customer) {
+    public long addCustomer(Customer customer) throws CrudException {
         try {
             String sqlStatement = "INSERT INTO customers (first_name, last_name, email, password) VALUES(?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -51,12 +89,20 @@ public class CustomersDBDAO implements CustomersDAO {
             return generatedKeysResult.getLong(1);
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to create a new customer");
+            throw new CrudException(EntityType.CUSTOMER, CrudType.CREATE);
         }
     }
 
+    /**
+     * Updates an existing customer in the database
+     *
+     * @param customer full Customer object (Id param is required)
+     * @throws CrudException if something gets wrong.
+     * @see Customer
+     * @see CrudException
+     */
     @Override
-    public void updateCustomer(Customer customer) {
+    public void updateCustomer(Customer customer) throws CrudException {
         try {
             String sqlStatement = "UPDATE customers set (first_name = ?, last_name = ?, email=?, password=?) WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -68,13 +114,19 @@ public class CustomersDBDAO implements CustomersDAO {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to update a new customer");
+            throw new CrudException(EntityType.CUSTOMER, CrudType.UPDATE);
         }
     }
 
-
+    /**
+     * Deletes a customer from the database
+     *
+     * @param customerID The customer id in the database
+     * @throws CrudException if something gets wrong.
+     * @see CrudException
+     */
     @Override
-    public void deleteCustomer(int customerID) {
+    public void deleteCustomer(int customerID) throws CrudException {
         try {
             String sqlStatement = "DELETE FROM customers WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -82,12 +134,22 @@ public class CustomersDBDAO implements CustomersDAO {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new CrudException(EntityType.CUSTOMER, CrudType.DELETE);
+
         }
 
     }
 
+    /**
+     * Gets all customers that exist in the database
+     *
+     * @return An ArrayList of all customers
+     * @throws CrudException if something gets wrong.
+     * @see Customer
+     * @see CrudException
+     */
     @Override
-    public ArrayList<Customer> getAllCustomers() {
+    public ArrayList<Customer> getAllCustomers() throws CrudException {
         try {
             String sqlStatement = "SELECT * FROM customers";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
@@ -99,25 +161,33 @@ public class CustomersDBDAO implements CustomersDAO {
             return customers;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to retrieve all companies");
+            throw new CrudException(EntityType.CUSTOMER, CrudType.READ_ALL);
         }
     }
 
+    /**
+     * Gets a customer from the database by given ID
+     *
+     * @param customerID The customer id in the database
+     * @return A Customer object
+     * @throws CrudException if something gets wrong.
+     * @see Customer
+     * @see CrudException
+     */
     @Override
-    public Customer getOneCustomer(long customerID) {
-        try{
+    public Customer getOneCustomer(long customerID) throws CrudException {
+        try {
             String sqlStatement = "SELECT * FROM customers WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement,Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setLong(1,customerID);
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setLong(1, customerID);
             ResultSet result = preparedStatement.executeQuery();
-            if(!result.next()){
+            if (!result.next()) {
                 return null;
             }
             return ObjectExtractionUtil.resultToCustomer(result);
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("failed to retrieve customer with id: "+customerID);
+            throw new CrudException(EntityType.CUSTOMER, CrudType.READ, customerID);
         }
     }
 }
