@@ -51,44 +51,31 @@ public class AdminFacade extends ClientFacade {
         }
     }
 
-    public long addNewCompany(Company company) {
-        try {
-            ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
-            isCompanyNameExist(company, allCompanies);
-            isCompanyEmailExist(company, allCompanies);
-            return companiesDAO.addCompany(company);
-        } catch (NameExistException | EmailExistException | CrudException e) {
-            e.printStackTrace();
-            return 0;
+    public long addNewCompany(Company company) throws NameExistException, EmailExistException, CrudException {
+        ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
+        isCompanyNameExist(company, allCompanies);
+        isCompanyEmailExist(company, allCompanies);
+        return companiesDAO.addCompany(company);
+    }
+
+    public void updateCompany(Company company) throws UpdateException, CrudException {
+        Company companyToUpdate = companiesDAO.getOneCompany(company.getId());
+        if (!company.getName().equals(companyToUpdate.getName())) {
+            throw new UpdateException("Name cannot be updated");
+        } else {
+            companiesDAO.updateCompany(company);
         }
     }
 
-    public void updateCompany(Company company) {
-        try {
-            Company companyToUpdate = companiesDAO.getOneCompany(company.getId());
-            if (!company.getName().equals(companyToUpdate.getName())) {
-                throw new UpdateException("Name cannot be updated");
-            } else {
-                companiesDAO.updateCompany(company);
+    public void deleteCompany(int companyId) throws CrudException {
+        companiesDAO.deleteCompany(companyId);
+        couponsDAO.deleteCompanyCoupons(companyId);
+        ArrayList<Coupon> coupons = couponsDAO.getAllCoupons();
+        for (Coupon coupon :
+                coupons) {
+            if (coupon.getCompanyID() == companyId) {
+                couponsDAO.deletePurchaseByCouponId(coupon.getId());
             }
-        } catch (UpdateException | CrudException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void deleteCompany(int companyId) {
-        try {
-            companiesDAO.deleteCompany(companyId);
-            couponsDAO.deleteCompanyCoupons(companyId);
-            ArrayList<Coupon> coupons = couponsDAO.getAllCoupons();
-            for (Coupon coupon :
-                    coupons) {
-                if (coupon.getCompanyID() == companyId) {
-                    couponsDAO.deletePurchaseByCouponId(coupon.getId());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -107,18 +94,13 @@ public class AdminFacade extends ClientFacade {
         return company;
     }
 
-    public long addNewCustomer(Customer customer) {
-        try {
-            ArrayList<Customer> allCustomers = customersDAO.getAllCustomers();
-            isCustomerEmailExist(customer, allCustomers);
-            return customersDAO.addCustomer(customer);
-        } catch (EmailExistException e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public long addNewCustomer(Customer customer) throws EmailExistException, CrudException {
+        ArrayList<Customer> allCustomers = customersDAO.getAllCustomers();
+        isCustomerEmailExist(customer, allCustomers);
+        return customersDAO.addCustomer(customer);
     }
 
-    public void updateCustomer(Customer customer) {
+    public void updateCustomer(Customer customer) throws CrudException {
         customersDAO.updateCustomer(customer);
     }
 
