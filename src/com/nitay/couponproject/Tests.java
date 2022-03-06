@@ -2,10 +2,7 @@ package com.nitay.couponproject;
 
 import com.nitay.couponproject.dal.CouponsDBDAO;
 import com.nitay.couponproject.enums.ClientType;
-import com.nitay.couponproject.exceptions.CouponTitleExistException;
-import com.nitay.couponproject.exceptions.CrudException;
-import com.nitay.couponproject.exceptions.UpdateException;
-import com.nitay.couponproject.exceptions.WrongCredentialsException;
+import com.nitay.couponproject.exceptions.*;
 import com.nitay.couponproject.facades.AdminFacade;
 import com.nitay.couponproject.facades.CompanyFacade;
 import com.nitay.couponproject.facades.CustomerFacade;
@@ -25,19 +22,19 @@ public class Tests {
     public static Company createCompany() {
         System.out.println("Create new company");
         return new Company(
-                getStringInput("Please enter company name: "),
-                getStringInput("Please enter company email: "),
-                getStringInput("Please enter company password: ")
+                getStringInput("Please enter company name"),
+                getStringInput("Please enter company email"),
+                getStringInput("Please enter company password")
         );
     }
 
     public static Customer createCustomer() {
         System.out.println("Create new customer");
         return new Customer(
-                getStringInput("Please enter first name: "),
-                getStringInput("Please enter last name: "),
-                getStringInput("Please enter email: "),
-                getStringInput("Please enter customer password: ")
+                getStringInput("Please enter first name"),
+                getStringInput("Please enter last name"),
+                getStringInput("Please enter email"),
+                getStringInput("Please enter customer password")
         );
     }
 
@@ -57,8 +54,8 @@ public class Tests {
                         getIntInput("enter end month"),
                         getIntInput("enter end day of month")
                 )),
-                getIntInput("please enter amount"),
-                (double) getIntInput("please enter amount"),
+                getIntInput("please enter coupon amount"),
+                (double) getIntInput("please enter coupon price"),
                 getStringInput("Enter coupon image url")
         );
     }
@@ -69,12 +66,16 @@ public class Tests {
             customerTests();
             companyTests();
             adminTests();
-        } catch (WrongCredentialsException | CrudException e) {
+        } catch (WrongCredentialsException |
+                CrudException |
+                NameExistException |
+                EmailExistException |
+                UpdateException e) {
             e.printStackTrace();
         }
     }
 
-    private static void adminTests() throws WrongCredentialsException, CrudException {
+    private static void adminTests() throws WrongCredentialsException, CrudException, NameExistException, EmailExistException, UpdateException {
         //ADMIN TESTS
         System.out.println("ADMIN TESTS");
         //Login
@@ -98,12 +99,12 @@ public class Tests {
 //            update name -> uncomment to get UpdateNameException
 //            company.setName(getStringInput("Enter new company name to update: "));
 
-        company.setEmail(getStringInput("Enter new company email to update: "));
+        company.setEmail(getStringInput("Enter new company email to update"));
         adminFacade.updateCompany(company);
         System.out.println("Updated company details: ");
         System.out.println(adminFacade.getOneCompany((int) newCompanyId));
 //            Update customer
-        customer.setFirstName(getStringInput("Enter new customer name to update: "));
+        customer.setFirstName(getStringInput("Enter new customer name to update"));
         adminFacade.updateCustomer(customer);
         System.out.println("Updated customer details: ");
         System.out.println(adminFacade.getOneCustomer((int) customer.getId()));
@@ -111,8 +112,8 @@ public class Tests {
         adminFacade.deleteCompany((int) newCompanyId);
         System.out.println("deleted company id: " + newCompanyId);
 //            // Delete one customer
-            adminFacade.deleteCustomer((int) newCustomerId);
-            System.out.println("deleted customer id: " + newCustomerId);
+        adminFacade.deleteCustomer((int) newCustomerId);
+        System.out.println("deleted customer id: " + newCustomerId);
     }
 
     private static void companyTests() {
@@ -120,8 +121,8 @@ public class Tests {
             System.out.println("COMPANY TESTS");
             System.out.println("Login company");
             CompanyFacade companyFacade = (CompanyFacade) LoginManager.getInstance().login(
-                    getStringInput("Please enter company mail: "),
-                    getStringInput("Please enter company password: "),
+                    getStringInput("Please enter company mail"),
+                    getStringInput("Please enter company password"),
                     ClientType.Company
             );
             //Get company details
@@ -169,46 +170,42 @@ public class Tests {
         }
     }
 
-    private static void customerTests() {
-        try {
-            System.out.println("CUSTOMER TESTS");
-            System.out.println("Login");
-            CustomerFacade customerFacade = (CustomerFacade) LoginManager
-                    .getInstance()
-                    .login(
-                            getStringInput("Please enter customer email"),
-                            getStringInput("Please enter customer password"),
-                            ClientType.Customer
-                    );
-            System.out.println("Logged in, customer details: ");
-            System.out.println(customerFacade.getCustomerDetails().toString());
+    private static void customerTests() throws WrongCredentialsException, CrudException {
+        System.out.println("CUSTOMER TESTS");
+        System.out.println("Login");
+        CustomerFacade customerFacade = (CustomerFacade) LoginManager
+                .getInstance()
+                .login(
+                        getStringInput("Please enter customer email"),
+                        getStringInput("Please enter customer password"),
+                        ClientType.Customer
+                );
+        System.out.println("Logged in, customer details: ");
+        System.out.println(customerFacade.getCustomerDetails().toString());
 
-            //Purchase Coupon
-            ArrayList<Coupon> availableCoupons = CouponsDBDAO.instance.getAllCoupons();
-            System.out.println("available coupons: ");
-            System.out.println(availableCoupons.toString());
-            Integer chosenCouponId = getIntInput("Please choose coupon id to purchase");
-            Coupon chosenCoupon = CouponsDBDAO.instance.getOneCoupon(chosenCouponId);
-            customerFacade.purchaseCoupon(chosenCoupon);
+        //Purchase Coupon
+        ArrayList<Coupon> availableCoupons = CouponsDBDAO.getInstance().getAllCoupons();
+        System.out.println("available coupons: ");
+        System.out.println(availableCoupons.toString());
+        Integer chosenCouponId = getIntInput("Please choose coupon id to purchase");
+        Coupon chosenCoupon = CouponsDBDAO.getInstance().getOneCoupon(chosenCouponId);
+        customerFacade.purchaseCoupon(chosenCoupon);
 
-            //Get customer coupons methods
+        //Get customer coupons methods
 
-            //Get all customer coupons
-            System.out.println("All customer coupons");
-            System.out.println(customerFacade.getCustomerCoupons());
+        //Get all customer coupons
+        System.out.println("All customer coupons");
+        System.out.println(customerFacade.getCustomerCoupons());
 
-            //Get customer coupons by category
-            System.out.println("Customer coupons by category");
-            Category category = getCategory("Please enter category name: ");
-            System.out.println(customerFacade.getCustomerCoupons(category));
+        //Get customer coupons by category
+        System.out.println("Customer coupons by category");
+        Category category = getCategory("Please enter category name");
+        System.out.println(customerFacade.getCustomerCoupons(category));
 
-            //Get customer coupons by category
-            System.out.println("Customer coupons by max price");
-            double maxPrice = getDoubleInput("Please enter max price: ");
-            System.out.println(customerFacade.getCustomerCoupons(maxPrice));
-        } catch (WrongCredentialsException | CrudException e) {
-            e.printStackTrace();
-        }
+        //Get customer coupons by category
+        System.out.println("Customer coupons by max price");
+        double maxPrice = getDoubleInput("Please enter max price");
+        System.out.println(customerFacade.getCustomerCoupons(maxPrice));
     }
 
     public static void main(String[] args) {
