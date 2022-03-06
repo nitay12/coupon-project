@@ -12,8 +12,8 @@ import com.nitay.couponproject.exceptions.WrongCredentialsException;
 public abstract class ClientFacade {
     ClientFacade(){
         this.companiesDAO = CompaniesDBDAO.getInstance();
-        this.customersDAO = CustomersDBDAO.instance;
-        this.couponsDAO = CouponsDBDAO.instance;
+        this.customersDAO = CustomersDBDAO.getInstance();
+        this.couponsDAO = CouponsDBDAO.getInstance();
     }
     protected CompaniesDAO companiesDAO;
     protected CustomersDAO customersDAO;
