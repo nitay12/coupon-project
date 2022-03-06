@@ -31,6 +31,9 @@ public class CompaniesDBDAO implements CompaniesDAO {
     @Getter
     private static final CompaniesDBDAO instance = new CompaniesDBDAO();
 
+    /**
+     * Sets the connection variable to a connection from ConnectionPool
+     */
     private CompaniesDBDAO() {
         try {
 //          connection = JDBCUtil.getConnection();
@@ -42,13 +45,12 @@ public class CompaniesDBDAO implements CompaniesDAO {
     }
 
     //---I deleted the loginCompany method because its a logic method it was implemented in CompanyFacade---
-
     /**
      * @param email    Company email
      * @param password Company password
      * @return Login status (boolean)
      * @throws CrudException if something gets wrong
-     * @deprecated
+     * @deprecated For being a logic method it was implemented in CompanyFacade
      */
     @Override
     public boolean loginCompany(final String email, final String password) throws CrudException {
