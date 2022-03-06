@@ -38,7 +38,7 @@ public interface CouponsDAO {
      * @throws CrudException if something gets wrong.
      * @see CrudException
      */
-    void deleteCoupon(int couponID) throws CrudException;
+    void deleteCoupon(long couponID) throws CrudException;
 
     /**
      * Deletes all company's coupons
@@ -47,7 +47,7 @@ public interface CouponsDAO {
      * @throws CrudException if something gets wrong.
      * @see CrudException
      */
-    void deleteCompanyCoupons(int companyID) throws CrudException;
+    void deleteCompanyCoupons(long companyID) throws CrudException;
 
     /**
      * Gets all coupons that exist in the database
@@ -68,7 +68,7 @@ public interface CouponsDAO {
      * @see Coupon
      * @see CrudException
      */
-    Coupon getOneCoupon(int couponID) throws CrudException;
+    Coupon getOneCoupon(long couponID) throws CrudException;
 
     /**
      * Add a one coupon purchase by one customer
@@ -79,7 +79,7 @@ public interface CouponsDAO {
      * @throws CrudException if something gets wrong
      * @see CrudException
      */
-    long addCouponPurchase(long customerId, int couponId) throws CrudException;
+    long addCouponPurchase(long customerId, long couponId) throws CrudException;
 
     //I separated the delete purchase method into two methods for better implementation
 

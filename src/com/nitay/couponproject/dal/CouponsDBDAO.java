@@ -120,11 +120,11 @@ public class CouponsDBDAO implements CouponsDAO {
      * @see CrudException
      */
     @Override
-    public void deleteCoupon(int couponID) throws CrudException {
+    public void deleteCoupon(long couponID) throws CrudException {
         try {
             String sqlStatement = "DELETE FROM coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            prep.setInt(1, couponID);
+            prep.setLong(1, couponID);
             prep.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -140,11 +140,11 @@ public class CouponsDBDAO implements CouponsDAO {
      * @see CrudException
      */
     @Override
-    public void deleteCompanyCoupons(int companyID) throws CrudException {
+    public void deleteCompanyCoupons(long companyID) throws CrudException {
         try {
             String sqlStatement = "DELETE FROM coupons WHERE company_id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            prep.setInt(1, companyID);
+            prep.setLong(1, companyID);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new CrudException("Failed to delete all coupons of company with id: " + companyID);
@@ -186,11 +186,11 @@ public class CouponsDBDAO implements CouponsDAO {
      * @see CrudException
      */
     @Override
-    public Coupon getOneCoupon(int couponID) throws CrudException {
+    public Coupon getOneCoupon(long couponID) throws CrudException {
         try {
             String sqlStatement = "SELECT * FROM coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            prep.setInt(1, couponID);
+            prep.setLong(1, couponID);
             ResultSet result = prep.executeQuery();
             if (!result.next()) {
                 return null;
@@ -369,12 +369,12 @@ public class CouponsDBDAO implements CouponsDAO {
      * @see CrudException
      */
     @Override
-    public long addCouponPurchase(long customerId, int couponId) throws CrudException {
+    public long addCouponPurchase(long customerId, long couponId) throws CrudException {
         try {
             String sqlStatement = "INSERT INTO customer_coupon (customer_id, coupon_id) VALUES(?, ?)";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, customerId);
-            prep.setInt(2, couponId);
+            prep.setLong(2, couponId);
             prep.executeUpdate();
             return couponId;
         } catch (SQLException e) {
