@@ -4,7 +4,10 @@ import com.nitay.couponproject.enums.CrudType;
 import com.nitay.couponproject.enums.EntityType;
 
 /**
- * An exception thrown when a CRUD operation goes wrong.
+ * Thrown when a CRUD operation goes wrong.
+ * can get a String message or EntityType with CrudType as parameters (Optional param - id).
+ * @see CrudType
+ * @see EntityType
  */
 public class CrudException extends Exception {
     private String entityName;
