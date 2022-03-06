@@ -4,16 +4,37 @@ import com.nitay.couponproject.dal.interfaces.CouponsDAO;
 import com.nitay.couponproject.enums.CrudType;
 import com.nitay.couponproject.enums.EntityType;
 import com.nitay.couponproject.exceptions.CrudException;
+import com.nitay.couponproject.facades.ClientFacade;
 import com.nitay.couponproject.model.Category;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.utils.ConnectionPool;
 import com.nitay.couponproject.utils.ObjectExtractionUtil;
+import lombok.Getter;
 
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * A singleton data access object, Implements CouponsDAO interface to make CRUD operations on a SQL database.
+ * CouponsDBDAO is connected to the ConnectionPool and used in the facades.
+ *
+ * @see CouponsDAO
+ * @see ConnectionPool
+ * @see ClientFacade
+ */
 public class CouponsDBDAO implements CouponsDAO {
-    public static final CouponsDBDAO instance = new CouponsDBDAO();
+    /**
+     * A connection from the ConnectionPool
+     *
+     * @see ConnectionPool
+     */
+    private final Connection connection;
+    @Getter
+    private static final CouponsDBDAO instance = new CouponsDBDAO();
+
+    /**
+     * Sets the connection variable to a connection from ConnectionPool
+     */
     private CouponsDBDAO() {
         try {
 //            connection = JDBCUtil.getConnection();
@@ -24,8 +45,15 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
-    private final Connection connection;
-
+    /**
+     * Adds a new coupon to the database
+     *
+     * @param coupon A Coupon object (no Id required)
+     * @return Auto generated coupon ID
+     * @throws CrudException if something gets wrong.
+     * @see Coupon
+     * @see CrudException
+     */
     @Override
     public long addCoupon(Coupon coupon) throws CrudException {
         try {
@@ -53,6 +81,14 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Updates an existing coupon in the database
+     *
+     * @param coupon A full Coupon object (Id param is required)
+     * @throws CrudException if something gets wrong.
+     * @see Coupon
+     * @see CrudException
+     */
     @Override
     public void updateCoupon(Coupon coupon) throws CrudException {
         try {
@@ -76,6 +112,13 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Deletes a coupon from the database
+     *
+     * @param couponID The coupon id in the database
+     * @throws CrudException if something gets wrong.
+     * @see CrudException
+     */
     @Override
     public void deleteCoupon(int couponID) throws CrudException {
         try {
@@ -89,6 +132,13 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Deletes all company's coupons
+     *
+     * @param companyID The company id
+     * @throws CrudException if something gets wrong.
+     * @see CrudException
+     */
     @Override
     public void deleteCompanyCoupons(int companyID) throws CrudException {
         try {
@@ -101,6 +151,14 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all coupons that exist in the database
+     *
+     * @return An ArrayList of all coupons
+     * @throws CrudException if something gets wrong.
+     * @see Coupon
+     * @see CrudException
+     */
     @Override
     public ArrayList<Coupon> getAllCoupons() throws CrudException {
         try {
@@ -118,6 +176,15 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets a coupon from the database by given ID
+     *
+     * @param couponID The coupon id in the database
+     * @return A Coupon object
+     * @throws CrudException if something gets wrong
+     * @see Coupon
+     * @see CrudException
+     */
     @Override
     public Coupon getOneCoupon(int couponID) throws CrudException {
         try {
@@ -135,6 +202,12 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all coupons of given company
+     *
+     * @param companyId The company id in the database
+     * @return ArrayList of all company's coupons
+     */
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId) throws CrudException {
         try {
@@ -153,6 +226,13 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all the given company's coupons filtered by given category
+     *
+     * @param companyId The company id in the database
+     * @param category  A Category (enum) refers the category column in the database
+     * @return ArrayList of all company's coupons filtered by category
+     */
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId, Category category) throws CrudException {
         try {
@@ -172,6 +252,14 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all coupons of the given company up to the given maximum price
+     *
+     * @param companyId The company id in the database
+     * @param maxPrice  Maximum price to filter the result
+     * @return ArrayList of all company's coupons up to maxPrice
+     * @throws CrudException if something gets wrong
+     */
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId, double maxPrice) throws CrudException {
         try {
@@ -191,7 +279,15 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
-
+    /**
+     * Gets all coupons of given customer
+     *
+     * @param customerId The customer id in the database
+     * @return An ArrayList of all given customer's coupons
+     * @throws CrudException if something gets wrong.
+     * @see Coupon
+     * @see CrudException
+     */
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId) throws CrudException {
         try {
@@ -210,6 +306,13 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all coupons of given customer filtered by given category
+     *
+     * @param customerId The customer id in the database
+     * @param category   A Category (enum) refers the category column in the database
+     * @return ArrayList of all customer's coupons filtered by category
+     */
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId, Category category) throws CrudException {
         try {
@@ -229,6 +332,14 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Gets all coupons of the given customer up to the given maximum price
+     *
+     * @param customerId The customer id in the database
+     * @param maxPrice   Maximum price to filter the result
+     * @return ArrayList of all customer's coupons up to maxPrice
+     * @throws CrudException if something gets wrong.
+     */
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId, double maxPrice) throws CrudException {
         try {
@@ -248,8 +359,15 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
-
-
+    /**
+     * Add a one coupon purchase by one customer
+     *
+     * @param customerId The customer id (must exist in the database)
+     * @param couponId   The coupon id (must exist in the database)
+     * @return The Coupon id
+     * @throws CrudException if something gets wrong
+     * @see CrudException
+     */
     @Override
     public long addCouponPurchase(long customerId, int couponId) throws CrudException {
         try {
@@ -266,6 +384,14 @@ public class CouponsDBDAO implements CouponsDAO {
 
     }
 
+    //I separated the delete purchase method into two methods for better implementation
+
+    /**
+     * Deletes a coupon purchase
+     *
+     * @param couponId The coupon id
+     * @throws CrudException if something gets wrong.
+     */
     @Override
     public void deletePurchaseByCouponId(long couponId) throws CrudException {
         try {
@@ -279,6 +405,12 @@ public class CouponsDBDAO implements CouponsDAO {
         }
     }
 
+    /**
+     * Deletes a coupon purchase
+     *
+     * @param customerId The customer id
+     * @throws CrudException if something gets wrong
+     */
     @Override
     public void deletePurchaseByCustomerId(long customerId) throws CrudException {
         try {
