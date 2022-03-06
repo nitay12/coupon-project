@@ -12,8 +12,8 @@ import java.sql.Date;
 @NoArgsConstructor
 @ToString
 public class Coupon {
-    private int id;
-    private int companyID;
+    private long id;
+    private long companyID;
     private Category category;
     private String title;
     private String description;
