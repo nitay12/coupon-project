@@ -42,16 +42,25 @@ public class CompaniesDBDAO implements CompaniesDAO {
     }
 
     //---I deleted the loginCompany method because its a logic method it was implemented in CompanyFacade---
-//    public boolean loginCompany(final String email, final String password) throws CrudException {
-//        ArrayList<Company> companies = getAllCompanies();
-//        for (Company c :
-//                companies) {
-//            if (c.getEmail().equals(email) && c.getPassword().equals(String.valueOf(password.hashCode()))) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+
+    /**
+     * @param email    Company email
+     * @param password Company password
+     * @return Login status (boolean)
+     * @throws CrudException if something gets wrong
+     * @deprecated
+     */
+    @Override
+    public boolean loginCompany(final String email, final String password) throws CrudException {
+        ArrayList<Company> companies = getAllCompanies();
+        for (Company c :
+                companies) {
+            if (c.getEmail().equals(email) && c.getPassword().equals(String.valueOf(password.hashCode()))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     //
 

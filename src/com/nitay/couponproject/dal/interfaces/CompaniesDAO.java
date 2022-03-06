@@ -9,8 +9,15 @@ import java.util.ArrayList;
  * An interface for companies data access object
  */
 public interface CompaniesDAO {
+    /**
+     * @deprecated
+     * @param email Company email
+     * @param password Company password
+     * @return Login status (boolean)
+     * @throws CrudException if something gets wrong
+     */
     //---I deleted the loginCompany method because its a logic method it was implemented in CompanyFacade---
-    //boolean loginCompany(String email, String password) throws CrudException;
+    boolean loginCompany(String email, String password) throws CrudException;
 
     // TODO: Generify a Crud DAO and implement on all DAOs
 
