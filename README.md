@@ -13,3 +13,5 @@ The javadocs html was uploaded to the internet too - https://nitay12.github.io/c
 <br>
 <br>
 The test method can be run from the Test class main method or from the coupon management system.
+<br>
+I commented out the cases that raise exceptions 
