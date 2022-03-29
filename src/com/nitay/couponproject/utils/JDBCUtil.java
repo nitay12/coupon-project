@@ -1,9 +1,15 @@
 package com.nitay.couponproject.utils;
 
+import com.nitay.couponproject.config.Config;
+
 import java.sql.*;
 
-import static com.nitay.couponproject.config.Config.MySQLpass;
-
+/**
+ * A utility class for simple database connection.
+ *
+ * @see ConnectionPool
+ * @deprecated Replaced with ConnectionPool
+ */
 public class JDBCUtil {
     static {
         try {
@@ -17,7 +23,7 @@ public class JDBCUtil {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/coupons_project?useSSL=false&serverTimezone=UTC",
                 "root",
-                MySQLpass
+                Config.getMySQLpass()
         );
     }
 

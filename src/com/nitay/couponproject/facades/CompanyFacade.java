@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 
-//TODO: Verify that methods using companyId arent get null or 0 (throw not logged in exception)
+/**
+ * A facade for all company operations
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 public class CompanyFacade extends ClientFacade {
@@ -32,7 +34,7 @@ public class CompanyFacade extends ClientFacade {
      */
     //TODO Remove side effect or change login to void
     @Override
-    public boolean login(String email, String password) throws WrongCredentialsException, CrudException {
+    public boolean login(String email, String password) throws WrongCredentialsException, CrudException, InterruptedException {
         ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
@@ -96,7 +98,7 @@ public class CompanyFacade extends ClientFacade {
      * @param couponId The coupon id in the database
      * @throws CrudException If there is any SQL exception
      */
-    public void deleteCoupon(int couponId) throws CrudException {
+    public void deleteCoupon(long couponId) throws CrudException {
         couponsDAO.deletePurchaseByCouponId(couponId);
         couponsDAO.deleteCoupon(couponId);
     }
@@ -118,7 +120,7 @@ public class CompanyFacade extends ClientFacade {
      * @param category Category (enum) to filter the result
      * @return ArrayList of the company's coupons filtered by given category
      * @throws CrudException If there is any SQL exception
-     * @see Company
+     * @see Category
      */
     public ArrayList<Coupon> getCompanyCoupons(Category category) throws CrudException {
         return couponsDAO.getCompanyCoupons(companyId, category);
@@ -130,7 +132,6 @@ public class CompanyFacade extends ClientFacade {
      * @param maxPrice The price to filter the result
      * @return ArrayList of the company's coupons up to hte given maximum price
      * @throws CrudException If there is any SQL exception
-     * @see Company
      */
     public ArrayList<Coupon> getCompanyCoupons(double maxPrice) throws CrudException {
         return couponsDAO.getCompanyCoupons(companyId, maxPrice);
@@ -143,9 +144,20 @@ public class CompanyFacade extends ClientFacade {
      * @throws CrudException If there is any SQL exception
      * @see Company
      */
-    public Company loggedInCompanyDetails() throws CrudException {
+    public Company loggedInCompanyDetails() throws CrudException, InterruptedException {
         Company company = companiesDAO.getOneCompany(companyId);
         company.setCoupons(getCompanyCoupons());
         return company;
+    }
+
+    public Coupon getOneCompanyCoupon(long couponId) throws CrudException {
+        final ArrayList<Coupon> companyCoupons = this.getCompanyCoupons();
+        for (Coupon coupon :
+                companyCoupons) {
+            if (coupon.getId() == couponId) {
+                return coupon;
+            }
+        }
+        return null;
     }
 }

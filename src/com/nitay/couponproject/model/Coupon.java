@@ -7,6 +7,9 @@ import lombok.ToString;
 
 import java.sql.Date;
 
+/**
+ * A data class that represents a coupon
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

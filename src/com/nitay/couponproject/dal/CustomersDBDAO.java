@@ -25,21 +25,11 @@ public class CustomersDBDAO implements CustomersDAO {
     @Getter
     private static final CustomersDBDAO instance = new CustomersDBDAO();
 
-    /**
-     * A connection from the ConnectionPool
-     *
-     * @see ConnectionPool
-     */
-    private final Connection connection;
-
-    /**
-     * Sets the connection variable to a connection from ConnectionPool
-     */
+    ConnectionPool connectionPool;
     private CustomersDBDAO() {
         try {
-//            connection = JDBCUtil.getConnection();
-            connection = ConnectionPool.getInstance().getConnection();
-        } catch (SQLException | InterruptedException e) {
+            connectionPool = ConnectionPool.getInstance();
+        } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Connection with database was failed");
         }
@@ -74,7 +64,8 @@ public class CustomersDBDAO implements CustomersDAO {
     @Override
     public long addCustomer(Customer customer) throws CrudException {
         try {
-            String sqlStatement = "INSERT INTO customers (first_name, last_name, email, password) VALUES(?, ?, ?, ?)";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "INSERT INTO coupons_project.customers (first_name, last_name, email, password) VALUES(?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, customer.getFirstName());
             preparedStatement.setString(2, customer.getLastName());
@@ -82,12 +73,13 @@ public class CustomersDBDAO implements CustomersDAO {
             preparedStatement.setLong(4, customer.getPassword().hashCode());
             preparedStatement.executeUpdate();
             ResultSet generatedKeysResult = preparedStatement.getGeneratedKeys();
-
             if (!generatedKeysResult.next()) {
+                connectionPool.returnConnection(connection);
                 throw new RuntimeException("Failed to retrieve customer id");
             }
+            connectionPool.returnConnection(connection);
             return generatedKeysResult.getLong(1);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.CUSTOMER, CrudType.CREATE);
         }
@@ -104,15 +96,17 @@ public class CustomersDBDAO implements CustomersDAO {
     @Override
     public void updateCustomer(Customer customer) throws CrudException {
         try {
-            String sqlStatement = "UPDATE customers set (first_name = ?, last_name = ?, email=?, password=?) WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "UPDATE coupons_project.customers set first_name = ?, last_name = ?, email=?, password=? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, customer.getFirstName());
             preparedStatement.setString(2, customer.getLastName());
             preparedStatement.setString(3, customer.getEmail());
             preparedStatement.setLong(4, customer.getPassword().hashCode());
+            preparedStatement.setLong(5,customer.getId());
             preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.CUSTOMER, CrudType.UPDATE);
         }
@@ -126,18 +120,18 @@ public class CustomersDBDAO implements CustomersDAO {
      * @see CrudException
      */
     @Override
-    public void deleteCustomer(int customerID) throws CrudException {
+    public void deleteCustomer(long customerID) throws CrudException {
         try {
-            String sqlStatement = "DELETE FROM customers WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "DELETE FROM coupons_project.customers WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setInt(1, customerID);
+            preparedStatement.setLong(1, customerID);
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.CUSTOMER, CrudType.DELETE);
-
         }
-
     }
 
     /**
@@ -151,15 +145,17 @@ public class CustomersDBDAO implements CustomersDAO {
     @Override
     public ArrayList<Customer> getAllCustomers() throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM customers";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.customers";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             ResultSet result = preparedStatement.executeQuery();
             ArrayList<Customer> customers = new ArrayList();
             while (result.next()) {
                 customers.add(ObjectExtractionUtil.resultToCustomer(result));
             }
+            connectionPool.returnConnection(connection);
             return customers;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.CUSTOMER, CrudType.READ_ALL);
         }
@@ -177,15 +173,18 @@ public class CustomersDBDAO implements CustomersDAO {
     @Override
     public Customer getOneCustomer(long customerID) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM customers WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.customers WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, customerID);
             ResultSet result = preparedStatement.executeQuery();
             if (!result.next()) {
+                connectionPool.returnConnection(connection);
                 return null;
             }
+            connectionPool.returnConnection(connection);
             return ObjectExtractionUtil.resultToCustomer(result);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.CUSTOMER, CrudType.READ, customerID);
         }

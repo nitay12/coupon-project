@@ -1,0 +1,11 @@
+com.nitay.couponproject.config
+com.nitay.couponproject.dal
+com.nitay.couponproject.dal.interfaces
+com.nitay.couponproject.enums
+com.nitay.couponproject.exceptions
+com.nitay.couponproject.facades
+com.nitay.couponproject.model
+com.nitay.couponproject.system
+com.nitay.couponproject.tasks
+com.nitay.couponproject.tests
+com.nitay.couponproject.utils

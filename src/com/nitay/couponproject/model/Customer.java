@@ -7,6 +7,9 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 
+/**
+ * A data class that represents a customer
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

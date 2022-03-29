@@ -22,29 +22,23 @@ import java.util.ArrayList;
  * @see ClientFacade
  */
 public class CompaniesDBDAO implements CompaniesDAO {
-    /**
-     * A connection from the ConnectionPool
-     *
-     * @see ConnectionPool
-     */
-    private final Connection connection;
     @Getter
     private static final CompaniesDBDAO instance = new CompaniesDBDAO();
+    private ConnectionPool connectionPool;
 
     /**
-     * Sets the connection variable to a connection from ConnectionPool
+     * Sets the connectionPool variable to the {@link ConnectionPool} instance
      */
     private CompaniesDBDAO() {
         try {
-//          connection = JDBCUtil.getConnection();
-            connection = ConnectionPool.getInstance().getConnection();
-        } catch (SQLException | InterruptedException e) {
+            this.connectionPool = ConnectionPool.getInstance();
+        } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Connection with database was failed");
         }
     }
 
     //---I deleted the loginCompany method because its a logic method it was implemented in CompanyFacade---
+
     /**
      * @param email    Company email
      * @param password Company password
@@ -53,7 +47,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
      * @deprecated For being a logic method it was implemented in CompanyFacade
      */
     @Override
-    public boolean loginCompany(final String email, final String password) throws CrudException {
+    public boolean loginCompany(final String email, final String password) throws CrudException, InterruptedException {
         ArrayList<Company> companies = getAllCompanies();
         for (Company c :
                 companies) {
@@ -76,9 +70,10 @@ public class CompaniesDBDAO implements CompaniesDAO {
      * @see CrudException
      */
     @Override
-    public long addCompany(final Company company) throws CrudException {
+    public long addCompany(final Company company) throws CrudException, InterruptedException {
         try {
-            String sqlStatement = "INSERT INTO companies (name, email, password) VALUES(?, ?, ?)";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "INSERT INTO coupons_project.companies (name, email, password) VALUES(?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, company.getName());
             preparedStatement.setString(2, company.getEmail());
@@ -89,6 +84,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
             if (!generatedKeysResult.next()) {
                 throw new RuntimeException("Failed to retrieve company id");
             }
+            connectionPool.returnConnection(connection);
             return generatedKeysResult.getLong(1);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -106,15 +102,17 @@ public class CompaniesDBDAO implements CompaniesDAO {
      */
 
     @Override
-    public void updateCompany(Company company) throws CrudException {
+    public void updateCompany(Company company) throws CrudException, InterruptedException {
         try {
-            String sqlStatement = "UPDATE companies SET name = ?,email = ?, password = ? WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "UPDATE coupons_project.companies SET name = ?,email = ?, password = ? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, company.getName());
             preparedStatement.setString(2, company.getEmail());
             preparedStatement.setString(3, String.valueOf(company.getPassword().hashCode()));
             preparedStatement.setLong(4, company.getId());
             preparedStatement.executeUpdate();
+            connectionPool.returnConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COMPANY, CrudType.UPDATE);
@@ -129,12 +127,14 @@ public class CompaniesDBDAO implements CompaniesDAO {
      * @see CrudException
      */
     @Override
-    public void deleteCompany(long companyID) throws CrudException {
-        String sqlStatement = "DELETE FROM companies WHERE (id = ?)";
+    public void deleteCompany(long companyID) throws CrudException, InterruptedException {
+        String sqlStatement = "DELETE FROM coupons_project.companies WHERE (id = ?)";
         try {
+            Connection connection = connectionPool.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, companyID);
             preparedStatement.executeUpdate();
+            connectionPool.returnConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COMPANY, CrudType.DELETE);
@@ -150,15 +150,17 @@ public class CompaniesDBDAO implements CompaniesDAO {
      * @see CrudException
      */
     @Override
-    public ArrayList<Company> getAllCompanies() throws CrudException {
+    public ArrayList<Company> getAllCompanies() throws CrudException, InterruptedException {
         try {
-            String sqlStatement = "SELECT * FROM companies";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.companies";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             ResultSet result = preparedStatement.executeQuery();
             ArrayList<Company> companies = new ArrayList();
             while (result.next()) {
                 companies.add(ObjectExtractionUtil.resultToCompany(result));
             }
+            connectionPool.returnConnection(connection);
             return companies;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -177,9 +179,10 @@ public class CompaniesDBDAO implements CompaniesDAO {
      */
 
     @Override
-    public Company getOneCompany(long companyID) throws CrudException {
+    public Company getOneCompany(long companyID) throws CrudException, InterruptedException {
         try {
-            String sqlStatement = "SELECT * FROM companies WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.companies WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setLong(1, companyID);
             ResultSet result = preparedStatement.executeQuery();
@@ -187,7 +190,7 @@ public class CompaniesDBDAO implements CompaniesDAO {
                 return null;
             }
             Company company = ObjectExtractionUtil.resultToCompany(result);
-
+            ConnectionPool.getInstance().returnConnection(connection);
             return company;
         } catch (SQLException e) {
             e.printStackTrace();

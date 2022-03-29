@@ -23,23 +23,14 @@ import java.util.ArrayList;
  * @see ClientFacade
  */
 public class CouponsDBDAO implements CouponsDAO {
-    /**
-     * A connection from the ConnectionPool
-     *
-     * @see ConnectionPool
-     */
-    private final Connection connection;
     @Getter
     private static final CouponsDBDAO instance = new CouponsDBDAO();
+    private ConnectionPool connectionPool;
 
-    /**
-     * Sets the connection variable to a connection from ConnectionPool
-     */
     private CouponsDBDAO() {
         try {
-//            connection = JDBCUtil.getConnection();
-            connection = ConnectionPool.getInstance().getConnection();
-        } catch (SQLException | InterruptedException e) {
+            this.connectionPool = ConnectionPool.getInstance();
+        } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Connection with the database failed");
         }
@@ -57,7 +48,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public long addCoupon(Coupon coupon) throws CrudException {
         try {
-            String sqlStatement = "INSERT INTO coupons (company_id, category, title, description, start_date, end_date, amount, price, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "INSERT INTO coupons_project.coupons (company_id, category, title, description, start_date, end_date, amount, price, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, coupon.getCompanyID());
             prep.setString(2, coupon.getCategory().name());
@@ -74,8 +66,9 @@ public class CouponsDBDAO implements CouponsDAO {
             if (!result.next()) {
                 throw new CrudException("Failed to retrieve coupon id");
             }
+            connectionPool.returnConnection(connection);
             return result.getLong(1);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.CREATE);
         }
@@ -92,7 +85,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void updateCoupon(Coupon coupon) throws CrudException {
         try {
-            String sqlStatement = "UPDATE coupons SET company_id = ?, category =?, title = ?, description = ?, start_date = ?, end_date = ?, amount = ?, price = ?, image = ? WHERE id = ? ";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "UPDATE coupons_project.coupons SET company_id = ?, category =?, title = ?, description = ?, start_date = ?, end_date = ?, amount = ?, price = ?, image = ? WHERE id = ? ";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, coupon.getCompanyID());
             prep.setString(2, coupon.getCategory().name());
@@ -105,8 +99,8 @@ public class CouponsDBDAO implements CouponsDAO {
             prep.setString(9, coupon.getImage());
             prep.setLong(10, coupon.getId());
             prep.executeUpdate();
-
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.UPDATE);
         }
@@ -122,11 +116,13 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void deleteCoupon(long couponID) throws CrudException {
         try {
-            String sqlStatement = "DELETE FROM coupons WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "DELETE FROM coupons_project.coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, couponID);
             prep.executeUpdate();
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.DELETE, couponID);
         }
@@ -142,10 +138,12 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void deleteCompanyCoupons(long companyID) throws CrudException {
         try {
-            String sqlStatement = "DELETE FROM coupons WHERE company_id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "DELETE FROM coupons_project.coupons WHERE company_id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, companyID);
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to delete all coupons of company with id: " + companyID);
         }
@@ -162,15 +160,17 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getAllCoupons() throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             ResultSet result = prep.executeQuery();
             ArrayList<Coupon> coupons = new ArrayList<>();
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.READ_ALL);
         }
@@ -188,15 +188,18 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public Coupon getOneCoupon(long couponID) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons WHERE id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons WHERE id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, couponID);
             ResultSet result = prep.executeQuery();
             if (!result.next()) {
+                connectionPool.returnConnection(connection);
                 return null;
             }
+            connectionPool.returnConnection(connection);
             return ObjectExtractionUtil.resultToCoupon(result);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.READ, couponID);
         }
@@ -211,7 +214,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons WHERE company_id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, companyId);
             ResultSet result = prep.executeQuery();
@@ -219,8 +223,9 @@ public class CouponsDBDAO implements CouponsDAO {
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to retrieve all coupons of company id: " + companyId);
         }
@@ -236,7 +241,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId, Category category) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ? AND category = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons WHERE company_id = ? AND category = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, companyId);
             prep.setString(2, category.name());
@@ -246,7 +252,7 @@ public class CouponsDBDAO implements CouponsDAO {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to retrieve all coupons of company id: " + companyId);
         }
@@ -263,7 +269,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCompanyCoupons(long companyId, double maxPrice) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons WHERE company_id = ? AND price < ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons WHERE company_id = ? AND price < ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, companyId);
             prep.setDouble(2, maxPrice);
@@ -272,8 +279,9 @@ public class CouponsDBDAO implements CouponsDAO {
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to retrieve all coupons of company id: " + companyId);
         }
@@ -291,7 +299,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons JOIN customer_coupon ON customer_id = ? AND coupon_id=id";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons JOIN coupons_project.customer_coupon ON customer_id = ? AND coupon_id=id";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, customerId);
             ResultSet result = prep.executeQuery();
@@ -299,8 +308,9 @@ public class CouponsDBDAO implements CouponsDAO {
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to retrieve all coupons of customer id: " + customerId);
         }
@@ -316,7 +326,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId, Category category) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons JOIN customer_coupon ON customer_id = ? AND coupon_id = id AND category = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons JOIN coupons_project.customer_coupon ON customer_id = ? AND coupon_id = id AND category = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, customerId);
             prep.setString(2, category.name());
@@ -325,8 +336,9 @@ public class CouponsDBDAO implements CouponsDAO {
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON, CrudType.READ_ALL, (int) customerId);
         }
@@ -343,7 +355,8 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public ArrayList<Coupon> getCustomerCoupons(long customerId, double maxPrice) throws CrudException {
         try {
-            String sqlStatement = "SELECT * FROM coupons JOIN customer_coupon ON customer_id = ? AND coupon_id=id AND price < ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "SELECT * FROM coupons_project.coupons JOIN coupons_project.customer_coupon ON customer_id = ? AND coupon_id=id AND price < ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement);
             prep.setLong(1, customerId);
             prep.setDouble(2, maxPrice);
@@ -352,8 +365,9 @@ public class CouponsDBDAO implements CouponsDAO {
             while (result.next()) {
                 coupons.add(ObjectExtractionUtil.resultToCoupon(result));
             }
+            connectionPool.returnConnection(connection);
             return coupons;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to retrieve all coupons of customer id: " + customerId);
         }
@@ -371,13 +385,15 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public long addCouponPurchase(long customerId, long couponId) throws CrudException {
         try {
-            String sqlStatement = "INSERT INTO customer_coupon (customer_id, coupon_id) VALUES(?, ?)";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "INSERT INTO coupons_project.customer_coupon (customer_id, coupon_id) VALUES(?, ?)";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, customerId);
             prep.setLong(2, couponId);
             prep.executeUpdate();
+            connectionPool.returnConnection(connection);
             return couponId;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON_PURCHASE, CrudType.CREATE);
         }
@@ -395,11 +411,13 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void deletePurchaseByCouponId(long couponId) throws CrudException {
         try {
-            String sqlStatement = "DELETE FROM customer_coupon WHERE coupon_id = ? ";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "DELETE FROM coupons_project.customer_coupon WHERE coupon_id = ? ";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, couponId);
             prep.executeUpdate();
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException(EntityType.COUPON_PURCHASE, CrudType.DELETE, couponId);
         }
@@ -414,11 +432,13 @@ public class CouponsDBDAO implements CouponsDAO {
     @Override
     public void deletePurchaseByCustomerId(long customerId) throws CrudException {
         try {
-            String sqlStatement = "DELETE FROM customer_coupon WHERE customer_id = ?";
+            Connection connection = connectionPool.getConnection();
+            String sqlStatement = "DELETE FROM coupons_project.customer_coupon WHERE customer_id = ?";
             PreparedStatement prep = connection.prepareStatement(sqlStatement, Statement.RETURN_GENERATED_KEYS);
             prep.setLong(1, customerId);
             prep.executeUpdate();
-        } catch (SQLException e) {
+            connectionPool.returnConnection(connection);
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
             throw new CrudException("Failed to delete coupon purchase of customer id: " + customerId);
         }

@@ -47,7 +47,7 @@ public interface CustomersDAO {
      * @throws CrudException if something gets wrong.
      * @see CrudException
      */
-    void deleteCustomer(int customerID) throws CrudException;
+    void deleteCustomer(long customerID) throws CrudException;
 
     /**
      * Gets all customers that exist in the database

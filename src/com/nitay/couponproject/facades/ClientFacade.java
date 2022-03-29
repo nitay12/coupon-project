@@ -39,5 +39,5 @@ public abstract class ClientFacade {
      * @throws WrongCredentialsException When email/password not exist or match
      * @throws CrudException If there is problem of getting all clients (used to compare email and password)
      */
-    protected abstract boolean login(String email, String password) throws WrongCredentialsException, CrudException;
+    protected abstract boolean login(String email, String password) throws WrongCredentialsException, CrudException, InterruptedException;
 }
