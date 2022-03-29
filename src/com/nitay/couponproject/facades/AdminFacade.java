@@ -1,9 +1,6 @@
 package com.nitay.couponproject.facades;
 
-import com.nitay.couponproject.exceptions.CrudException;
-import com.nitay.couponproject.exceptions.EmailExistException;
-import com.nitay.couponproject.exceptions.NameExistException;
-import com.nitay.couponproject.exceptions.UpdateException;
+import com.nitay.couponproject.exceptions.*;
 import com.nitay.couponproject.model.Company;
 import com.nitay.couponproject.model.Coupon;
 import com.nitay.couponproject.model.Customer;
@@ -29,12 +26,15 @@ public class AdminFacade extends ClientFacade {
      * @see LoginManager
      */
     @Override
-    public boolean login(String email, String password) {
+    public boolean login(String email, String password) throws WrongCredentialsException {
         //TODO:Real login implementation
 //        Hard coded implementation as mentioned in the instructions:
         String ADMIN_MAIL = "admin@admin.com";
         String ADMIN_PASS = "admin";
-        return email.equals(ADMIN_MAIL) && password.equals(ADMIN_PASS);
+        if (email.equals(ADMIN_MAIL) && password.equals(ADMIN_PASS)){
+            return true;
+        }
+        throw new WrongCredentialsException("Wrong email or password");
     }
 
     /**
@@ -95,7 +95,7 @@ public class AdminFacade extends ClientFacade {
      * @throws EmailExistException If the company's email already exist in the database
      * @throws CrudException       If there is any SQL exception
      */
-    public long addNewCompany(Company company) throws NameExistException, EmailExistException, CrudException {
+    public long addNewCompany(Company company) throws NameExistException, EmailExistException, CrudException, InterruptedException {
         ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
         isCompanyNameExist(company, allCompanies);
         isCompanyEmailExist(company, allCompanies);
@@ -109,7 +109,7 @@ public class AdminFacade extends ClientFacade {
      * @throws UpdateException If the user trying to update the company name
      * @throws CrudException   If there is any SQL exception
      */
-    public void updateCompany(Company company) throws UpdateException, CrudException {
+    public void updateCompany(Company company) throws UpdateException, CrudException, InterruptedException {
         Company companyToUpdate = companiesDAO.getOneCompany(company.getId());
         if (!company.getName().equals(companyToUpdate.getName())) {
             throw new UpdateException("Name cannot be updated");
@@ -124,7 +124,7 @@ public class AdminFacade extends ClientFacade {
      * @param companyId The company id in the database
      * @throws CrudException If there is any SQL exception
      */
-    public void deleteCompany(int companyId) throws CrudException {
+    public void deleteCompany(long companyId) throws CrudException, InterruptedException {
         ArrayList<Coupon> coupons = couponsDAO.getAllCoupons();
         for (Coupon coupon :
                 coupons) {
@@ -144,7 +144,7 @@ public class AdminFacade extends ClientFacade {
      * @throws CrudException If there is any SQL exception
      * @see Company
      */
-    public ArrayList<Company> getAllCompanies() throws CrudException {
+    public ArrayList<Company> getAllCompanies() throws CrudException, InterruptedException {
         ArrayList<Company> allCompanies = companiesDAO.getAllCompanies();
         for (Company company :
                 allCompanies) {
@@ -161,7 +161,7 @@ public class AdminFacade extends ClientFacade {
      * @throws CrudException If there is any SQL exception
      * @see Company
      */
-    public Company getOneCompany(int companyId) throws CrudException {
+    public Company getOneCompany(long companyId) throws CrudException, InterruptedException {
         Company company = companiesDAO.getOneCompany(companyId);
         company.setCoupons(couponsDAO.getCompanyCoupons(companyId));
         return company;
@@ -200,7 +200,7 @@ public class AdminFacade extends ClientFacade {
      * @param customerId The customer id in the database
      * @throws CrudException If there is any SQL exception
      */
-    public void deleteCustomer(int customerId) throws CrudException {
+    public void deleteCustomer(long customerId) throws CrudException {
         couponsDAO.deletePurchaseByCustomerId(customerId);
         customersDAO.deleteCustomer(customerId);
     }
@@ -227,7 +227,7 @@ public class AdminFacade extends ClientFacade {
      * @return A Customer object
      * @throws CrudException If there is any SQL exception
      */
-    public Customer getOneCustomer(int customerId) throws CrudException {
+    public Customer getOneCustomer(long customerId) throws CrudException {
         Customer customer = customersDAO.getOneCustomer(customerId);
         customer.setCoupons(couponsDAO.getCustomerCoupons(customer.getId()));
         return customer;

@@ -57,8 +57,8 @@ public class CouponSystem {
             case "n":
                 break;
         }
-        while (!quit) {
             expirationJobThread.start();
+        while (!quit) {
             printMainMenu();
             String answer = getStringInput("", Arrays.asList("0", "1", "2", "3","DOCS"));
             switch (answer) {
@@ -83,9 +83,9 @@ public class CouponSystem {
                     quit = true;
                     expirationJobThread.stop();
                     break;
-                case "QUIT":
+                case "DOCS":
                     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                        Desktop.getDesktop().browse(new URI("http://www.example.com"));
+                        Desktop.getDesktop().browse(new URI("https://nitay12.github.io/coupon-project/"));
                     }
             }
         }
